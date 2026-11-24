@@ -1,6 +1,6 @@
 ---
-name: improvement-loop-run
-description: Read a project's findings log, find repeated review and code-check findings, and propose permanent rules for them as pull requests. Use after improvement-loop-setup, on a schedule or on demand.
+name: loop-run
+description: Read a project's findings log, find repeated review and code-check findings, and propose permanent rules for them as pull requests. Use after loop-setup, on a schedule or on demand.
 ---
 
 # Improvement loop: run
@@ -9,7 +9,7 @@ Goal: turn mistakes that keep recurring into rules that prevent them, and prove 
 
 ## Step 1: Load
 
-- Read `.improvement-loop.json` in the project root. If it is missing, stop and tell the user to run `improvement-loop-setup` first.
+- Read `.improvement-loop.json` in the project root. If it is missing, stop and tell the user to run `loop-setup` first.
 - Read the findings log at `log_path`. If it has fewer than about 20 findings, say so and stop; there is not enough data to find real patterns.
 - Read the state file next to the log (`state.json`), if it exists. It records the date of the last run and the rules proposed so far with their categories.
 

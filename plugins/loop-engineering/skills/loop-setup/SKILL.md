@@ -1,11 +1,11 @@
 ---
-name: improvement-loop-setup
-description: Set up a self-improving review loop in the current project: detect its checks, CI and agent instructions, then install a findings log and config. Run once per project.
+name: loop-setup
+description: Set up a self-improving review loop in the current project. Detect its checks, CI and agent instructions, then install a findings log and config. Run once per project.
 ---
 
 # Improvement loop: setup
 
-Goal: make every finding from the project's reviewer and code checks get recorded, so the companion skill `improvement-loop-run` can later turn repeated findings into permanent rules.
+Goal: make every finding from the project's reviewer and code checks get recorded, so the companion skill `loop-run` can later turn repeated findings into permanent rules.
 
 This skill must adapt to whatever project it runs in. Never assume a language, check tool or CI system. Discover first, confirm with the user, then change things.
 
@@ -66,13 +66,13 @@ How to capture findings depends on what discovery found. Pick the lightest optio
 - Tool checks (static analysis, style, tests): use the tool's machine-readable output (JSON or similar) and a small script that converts it to log lines. Put the script in the project, for example `tools/improvement-loop/log-findings`.
 - AI reviewer: add to the reviewer's instructions that it must end its review with findings in the JSON line format above, and append them to the log. Reuse existing category labels where one fits; read the last 200 log lines to see which labels exist.
 - Claude Code hooks: if the checks run through hooks, the hook can call the logging script. Check the current Claude Code documentation for the hook configuration format before writing it; do not write it from memory.
-- `led_to_change`: set it when the fix is made. If that cannot be known at logging time, log `null` and let `improvement-loop-run` resolve it from git history.
+- `led_to_change`: set it when the fix is made. If that cannot be known at logging time, log `null` and let `loop-run` resolve it from git history.
 
 ## Step 5: Schedule the improvement run
 
 A skill cannot run on a timer by itself. Offer the user the options that fit the project and set up the one they choose:
 
-- Manual: the user runs `improvement-loop-run` when they want.
+- Manual: the user runs `loop-run` when they want.
 - A scheduled CI job (only if the log is reachable from CI).
 - A scheduled task on the user's machine.
 
@@ -80,7 +80,7 @@ A skill cannot run on a timer by itself. Offer the user the options that fit the
 
 - Run each check once and confirm that a log line is written and is valid JSON.
 - Confirm the log path is not accidentally inside the repository when the user asked for outside (and add it to .gitignore if it is inside and should not be committed).
-- Tell the user: what was installed, where the log is, how to change settings, and that `improvement-loop-run` is the next step once a few weeks of findings exist.
+- Tell the user: what was installed, where the log is, how to change settings, and that `loop-run` is the next step once a few weeks of findings exist.
 
 ## Rules
 
