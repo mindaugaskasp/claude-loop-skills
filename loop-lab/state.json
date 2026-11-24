@@ -1,0 +1,13 @@
+{
+  "status": "running",
+  "iteration": 0,
+  "max_iterations": 100,
+  "stall_limit": 5,
+  "iterations_without_gain": 0,
+  "consecutive_failed_runs": 0,
+  "failed_run_limit": 3,
+  "max_projects": 10,
+  "project_scores": {},
+  "total_score": null,
+  "history": []
+}
