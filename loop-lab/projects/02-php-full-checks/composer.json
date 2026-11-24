@@ -1,0 +1,31 @@
+{
+    "name": "acme/bookings",
+    "description": "Room booking service: bookings, prices and cancellation fees.",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.64",
+        "phpstan/phpstan": "^1.12",
+        "phpunit/phpunit": "^11.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Acme\\Bookings\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Acme\\Bookings\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "stan": "phpstan analyse --no-progress",
+        "cs": "php-cs-fixer fix --dry-run --diff",
+        "cs:fix": "php-cs-fixer fix",
+        "test": "phpunit",
+        "check": ["@stan", "@cs", "@test"]
+    }
+}
