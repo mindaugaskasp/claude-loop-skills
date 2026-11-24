@@ -66,4 +66,4 @@ If `benchmark_tasks_path` is set, re-run those tasks with and without the change
 - Never weaken or remove an existing check to make numbers look better.
 - Never propose a rule from a single finding or from findings that did not lead to a code change.
 - Prefer fewer, stronger rules. If nothing qualifies this run, report that and propose nothing.
-- If the reviewer itself looks like the problem (many findings that did not lead to changes), say so and propose tightening the reviewer's instructions instead of adding rules.
+- If most of the reviewer's findings did not lead to changes, the reviewer itself is the problem: say so and propose tightening the reviewer's instructions instead of adding rules. If only a minority did not, that is normal: give the number in the report and propose nothing for it.

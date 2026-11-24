@@ -1,6 +1,6 @@
 {
   "status": "running",
-  "iteration": 1,
+  "iteration": 2,
   "max_iterations": 100,
   "stall_limit": 5,
   "iterations_without_gain": 0,
@@ -9,7 +9,7 @@
   "max_projects": 10,
   "project_scores": {
     "01-php-style-only": {
-      "skills_version": "0.1.1",
+      "skills_version": "0.1.2",
       "earned": 16,
       "possible": 16,
       "setup": "9/9",
@@ -19,8 +19,23 @@
         "R4"
       ],
       "tool_calls": {
-        "E1": 8,
-        "E2": 8
+        "E1": 9,
+        "E2": 5
+      }
+    },
+    "02-php-full-checks": {
+      "skills_version": "0.1.2",
+      "earned": 16,
+      "possible": 16,
+      "setup": "9/9",
+      "run": "7/7",
+      "not_applicable": [
+        "S10",
+        "R4"
+      ],
+      "tool_calls": {
+        "E1": 9,
+        "E2": 11
       }
     }
   },
@@ -32,6 +47,14 @@
       "change": "loop-run step 5: a new test counts as a machine rule only when a test tool is already listed in checks; no new tools or home-made check scripts",
       "baseline": "15/16 (0.938)",
       "result": "16/16 (1.000)",
+      "decision": "gain"
+    },
+    {
+      "iteration": 2,
+      "date": "2026-11-24",
+      "change": "loop-run rules: propose a change to the reviewer only when most of its findings were not acted on; a minority is reported as a number and gets no proposal",
+      "baseline": "31/32 (0.969)",
+      "result": "32/32 (1.000)",
       "decision": "gain"
     }
   ]
