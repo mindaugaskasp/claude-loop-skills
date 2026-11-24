@@ -9,6 +9,8 @@ Goal: turn mistakes that keep recurring into rules that prevent them, and prove 
 
 ## Step 1: Load
 
+Read the three files below together in one step, not one at a time.
+
 - Read `.improvement-loop.json` in the project root. If it is missing, stop and tell the user to run `loop-setup` first.
 - Read the findings log at `log_path`. If it has fewer than about 20 findings, say so and stop; there is not enough data to find real patterns.
 - Read the state file next to the log (`state.json`), if it exists. It records the date of the last run and the rules proposed so far with their categories.
@@ -40,7 +42,7 @@ For each pattern, go down this list and take the first option that is possible i
 2. Coding-agent instruction: one short, specific line in `instruction_file`, with a concrete example of right and wrong.
 3. Reviewer instruction: tell the reviewer to always check for this.
 
-Before proposing a machine rule, run the tool with the new rule over the whole codebase and report how many existing violations it produces. If there are many, propose it with a baseline or scoped to new code, and say so.
+Before proposing a machine rule, run the tool with the new rule over the whole codebase and report how many existing violations it produces. When several machine rules are candidates, switch them all on for one trial run, read the count per rule from that one output, then undo the trial. If there are many, propose it with a baseline or scoped to new code, and say so.
 
 ## Step 6: Prune
 
@@ -66,4 +68,5 @@ If `benchmark_tasks_path` is set, re-run those tasks with and without the change
 - Never weaken or remove an existing check to make numbers look better.
 - Never propose a rule from a single finding or from findings that did not lead to a code change.
 - Prefer fewer, stronger rules. If nothing qualifies this run, report that and propose nothing.
+- Keep the run short: do each step with as few commands as you can, and do not look again at what you have already seen. Do not run the project's other checks to prove a proposal; the pull request's own checks do that.
 - If most of the reviewer's findings did not lead to changes, the reviewer itself is the problem: say so and propose tightening the reviewer's instructions instead of adding rules. If only a minority did not, that is normal: give the number in the report and propose nothing for it.
