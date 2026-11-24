@@ -36,7 +36,7 @@ Group the findings since the last run by category. A pattern qualifies when it a
 
 For each pattern, go down this list and take the first option that is possible in this project:
 
-1. Machine rule: a setting or rule in one of the tools listed in `checks`, or a new test. The mistake can then no longer be merged.
+1. Machine rule: a setting or rule in one of the tools listed in `checks`, or a new test when a test tool is listed in `checks`. The mistake can then no longer be merged. Do not add a new tool or a home-made check script to get a machine rule; if no listed tool can express the rule, go to option 2.
 2. Coding-agent instruction: one short, specific line in `instruction_file`, with a concrete example of right and wrong.
 3. Reviewer instruction: tell the reviewer to always check for this.
 
