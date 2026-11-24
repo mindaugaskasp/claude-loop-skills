@@ -1,0 +1,140 @@
+{
+  "project": "01-php-style-only",
+  "ladder_step": 1,
+  "description": "PHP library, one code-style tool (PHP-CS-Fixer), no CI, no agent instructions, no reviewer mechanism.",
+  "log_path": ".improvement-loop/findings.jsonl",
+  "environment_note": "Packagist is not reachable from the lab sessions, so PHP-CS-Fixer cannot be installed or run. S8 can pass by plainly stating that the check could not be run and why. R8 passes when a correct count of existing violations is given, by running the tool or by an honest hand count that is labelled as such.",
+  "setup": {
+    "S1": {
+      "language": "PHP",
+      "package_manager": "Composer"
+    },
+    "S2": {
+      "check_tools": [
+        {
+          "name": "php-cs-fixer",
+          "kind": "style",
+          "config": ".php-cs-fixer.dist.php"
+        }
+      ],
+      "must_not_report": [
+        "phpstan",
+        "psalm",
+        "phpcs",
+        "phpunit",
+        "any test tool"
+      ]
+    },
+    "S3": {
+      "ci": "none"
+    },
+    "S4": {
+      "agent_instruction_file": "none"
+    },
+    "S5": {
+      "reviewer_mechanism": "none (a person reads diffs and adds findings to the log by hand)"
+    },
+    "S6": "applies",
+    "S7": {
+      "log_path": ".improvement-loop/findings.jsonl",
+      "autonomy": "propose",
+      "count_only_findings_that_led_to_change": true,
+      "instruction_file": "CLAUDE.md",
+      "instruction_max_lines": 150,
+      "min_repeats_for_rule": 3,
+      "checks": [
+        "php-cs-fixer"
+      ],
+      "benchmark_tasks_path": null
+    },
+    "S8": "applies",
+    "S9": {
+      "must_stay_unchanged_or_stricter": [
+        ".php-cs-fixer.dist.php",
+        "composer.json scripts"
+      ],
+      "existing_log_lines_kept": 28
+    },
+    "S10": "does not apply"
+  },
+  "run": {
+    "planted_patterns": [
+      {
+        "id": "strict-types",
+        "categories": [
+          "missing-strict-types",
+          "no-strict-types-declaration"
+        ],
+        "count": 6,
+        "note": "two labels with the same meaning; must be merged",
+        "strongest_kind": "machine rule",
+        "rule": "PHP-CS-Fixer declare_strict_types (risky rule, needs setRiskyAllowed(true))",
+        "existing_violations": "3 files of 6: src/InvoiceLine.php, src/TaxCalculator.php, src/Http/InvoiceController.php"
+      },
+      {
+        "id": "loose-comparison",
+        "categories": [
+          "loose-comparison"
+        ],
+        "count": 5,
+        "strongest_kind": "machine rule",
+        "rule": "PHP-CS-Fixer strict_comparison (risky rule)",
+        "existing_violations": "4 places in 2 files: src/InvoiceRepository.php lines 20 and 33, src/TaxCalculator.php lines 16 and 20"
+      },
+      {
+        "id": "float-for-money",
+        "categories": [
+          "float-for-money"
+        ],
+        "count": 4,
+        "strongest_kind": "coding-agent instruction",
+        "rule": "one line in CLAUDE.md with a right and wrong example; no PHP-CS-Fixer rule exists for this and the project has no test tool",
+        "existing_violations": "not applicable"
+      }
+    ],
+    "decoys": [
+      {
+        "category": "unused-import",
+        "count": 1,
+        "why": "single finding (and no_unused_imports is already in the config)"
+      },
+      {
+        "category": "typo-in-comment",
+        "count": 1,
+        "why": "single finding"
+      },
+      {
+        "category": "missing-return-type",
+        "count": 2,
+        "why": "below min_repeats_for_rule of 3"
+      },
+      {
+        "category": "long-method",
+        "count": 4,
+        "why": "led_to_change is false on all of them"
+      },
+      {
+        "category": "brace-placement",
+        "count": 5,
+        "why": "already covered by an existing rule: braces_position is part of @PSR12 in the current config and the tool is what reported them"
+      }
+    ],
+    "R4": "does not apply (28 findings)",
+    "R5": "applies: autonomy is propose; proposals are files in proposals/, nothing committed to main",
+    "R6": "state file expected next to the log: .improvement-loop/state.json, listing 3 proposals",
+    "R7": "trend numbers (findings per week) required; there are no earlier rules, and the report should say so",
+    "R8": "applies to the two machine rules"
+  },
+  "scripted_answers": {
+    "log location": "Inside the repository at .improvement-loop/findings.jsonl. That file already exists: I have been writing review findings into it by hand for a few weeks. Keep every existing line, keep using that file, and keep it committed.",
+    "where checks run": "Only on my machine. There is no CI and I do not want one added now.",
+    "autonomy": "propose",
+    "which findings count": "The default: only findings that led to a code change.",
+    "reviewer": "There is no automated reviewer. I read the diff myself before merging and add findings to the log by hand. Do not add an AI reviewer.",
+    "agent instruction file": "None exists yet. I do use a coding agent on this project, so put CLAUDE.md as the instruction file in the config, but do not create the file during setup.",
+    "schedule": "Manual. I will run loop-run myself.",
+    "min repeats, max lines, benchmark tasks": "Use the defaults. I have no benchmark tasks.",
+    "confirm plan": "Yes, go ahead.",
+    "anything else": "Use whatever you recommend as the default, as long as no existing check gets weaker."
+  }
+}
