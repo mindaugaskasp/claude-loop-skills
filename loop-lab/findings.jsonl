@@ -1,0 +1,1 @@
+{"ts": "2026-11-24T22:10:00Z", "iteration": 1, "source": "scorecard", "category": "R3-new-test-without-test-tool", "project": "01-php-style-only", "summary": "For a pattern no listed check tool can express, loop-run proposed a home-made test script as a machine rule in a project with no test tool, instead of a coding-agent instruction.", "led_to_change": true}
