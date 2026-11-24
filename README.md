@@ -1,30 +1,33 @@
 # claude-loop-skills
 
-Two Claude Code skills that add a self-improving loop to any project that already has a reviewer and code checks.
+A Claude Code plugin, `loop-engineering`, with two skills that add a self-improving loop to any project that already has a reviewer and code checks.
 
 | Skill | When to run | What it does |
 |---|---|---|
-| `improvement-loop-setup` | Once per project | Detects the project's checks, CI and agent instructions, asks a few questions, then installs a findings log and a config file. |
-| `improvement-loop-run` | On a schedule or on demand | Reads the findings log, finds mistakes that keep recurring, and proposes permanent rules for them as pull requests. |
+| `loop-setup` | Once per project | Detects the project's checks, CI and agent instructions, asks a few questions, then installs a findings log and a config file. |
+| `loop-run` | On a schedule or on demand | Reads the findings log, finds mistakes that keep recurring, and proposes permanent rules for them as pull requests. |
 
 ## How it works
 
 1. Every finding from the reviewer and the code checks is appended to a log, one JSON line each.
-2. `improvement-loop-run` groups the findings and picks out the ones that repeat.
+2. `loop-run` groups the findings and picks out the ones that repeat.
 3. For each repeated mistake it proposes the strongest fix available: a tool rule or test first, then an instruction for the coding agent, then an instruction for the reviewer.
 4. On later runs it measures whether each rule reduced its category of finding, and suggests rewording or removing rules that did not.
 
 ## Install
 
-Copy or symlink the skill folders into a Claude Code skills directory:
-
-- For all your projects: `~/.claude/skills/`
-- For one project: `<project>/.claude/skills/`
-
 ```sh
-git clone https://github.com/mindaugaskasp/claude-loop-skills.git
-cp -r claude-loop-skills/skills/* ~/.claude/skills/
+claude plugin marketplace add mindaugaskasp/claude-loop-skills
+claude plugin install loop-engineering@mindaugaskasp-plugins
 ```
+
+On Claude Code 2.1.275 or later, one step inside a session also works:
+
+```
+/plugin install loop-engineering --marketplace mindaugaskasp/claude-loop-skills
+```
+
+Then run the skills as `/loop-engineering:loop-setup` and `/loop-engineering:loop-run`.
 
 ## Per-project settings
 
