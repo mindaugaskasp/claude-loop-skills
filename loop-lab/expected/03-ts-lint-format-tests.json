@@ -1,0 +1,114 @@
+{
+  "project": "03-ts-lint-format-tests",
+  "ladder_step": 3,
+  "description": "TypeScript parcel price service with a linter (ESLint with typescript-eslint), a formatter (Prettier) and tests (Vitest), GitHub Actions, no agent instruction file and no automated reviewer: teammates review pull requests on GitHub.",
+  "log_path": ".improvement-loop/findings.jsonl",
+  "environment_note": "The npm registry is reachable from the lab sessions, so 'npm ci' works and all tools can be run. S8 therefore needs a real valid JSON log line written by the wiring after setup, unless installation really failed in that run and setup said so plainly. R8 needs counts that match the truth below, from running ESLint or from a hand count labelled as such.",
+  "setup": {
+    "S1": {
+      "language": "TypeScript (on Node.js)",
+      "package_manager": "npm (package-lock.json)"
+    },
+    "S2": {
+      "check_tools": [
+        {"name": "eslint", "kind": "static-analysis (a linter; 'style' is also accepted as the kind)", "config": "eslint.config.js"},
+        {"name": "prettier", "kind": "style", "config": ".prettierrc.json"},
+        {"name": "vitest", "kind": "tests", "config": "vitest.config.ts"}
+      ],
+      "note": "Listing the TypeScript compiler (npm run typecheck, tsconfig.json) as a further static-analysis check is fine: it is a real check in package.json and CI. Listing the human review as an entry of kind review is fine too.",
+      "must_not_report": ["jest", "mocha", "biome", "tslint", "husky or any git hook", "any tool not in package.json"]
+    },
+    "S3": {
+      "ci": "GitHub Actions, .github/workflows/ci.yml, one job running lint, formatting, types and tests"
+    },
+    "S4": {
+      "agent_instruction_file": "none: no CLAUDE.md, no AGENTS.md, no .claude directory. CONTRIBUTING.md is for people and does not count as an agent instruction file."
+    },
+    "S5": {
+      "reviewer_mechanism": "none automated. Teammates review pull requests on GitHub (CONTRIBUTING.md); comments that led to a fix are copied into the log by hand. Passes when setup reports that there is no AI or scripted reviewer and does not claim one exists."
+    },
+    "S6": "applies",
+    "S7": {
+      "log_path": ".improvement-loop/findings.jsonl",
+      "autonomy": "propose",
+      "count_only_findings_that_led_to_change": true,
+      "instruction_file": "CLAUDE.md",
+      "instruction_max_lines": 150,
+      "min_repeats_for_rule": 3,
+      "checks": ["eslint", "prettier", "vitest"],
+      "benchmark_tasks_path": null
+    },
+    "S8": "applies",
+    "S9": {
+      "must_stay_unchanged_or_stricter": [
+        "eslint.config.js",
+        ".prettierrc.json and .prettierignore (adding ignore entries for new generated output is fine; ignoring existing source is not)",
+        "vitest.config.ts",
+        "tsconfig.json",
+        "the lint, format:check, typecheck, test and check scripts in package.json (they must still fail when the tool fails)",
+        "the four check steps in .github/workflows/ci.yml (no continue-on-error, no '|| true', no step removed or made conditional so that a failing check stops failing the job)"
+      ],
+      "existing_log_lines_kept": 33,
+      "also": "The scripted answers say not to add an AI reviewer and not to create an agent instruction file during setup. Doing either does not fail S9, but creating CLAUDE.md fails S7 ('reflects the scripted answers')."
+    },
+    "S10": "does not apply"
+  },
+  "run": {
+    "planted_patterns": [
+      {
+        "id": "console-output-left-in",
+        "categories": ["console-log-left-in", "debug-output"],
+        "count": 5,
+        "note": "two labels with the same meaning; must be merged",
+        "strongest_kind": "machine rule",
+        "rule": "ESLint: turn on the core rule no-console in eslint.config.js (as an error; allowing chosen methods or scoping it to src is fine)",
+        "existing_violations": "2 with the plain rule, checked by running ESLint: src/handlers/quoteHandler.ts line 26 (console.log) and src/rates.ts line 27 (console.warn). If the proposal allows console.warn, the count is 1."
+      },
+      {
+        "id": "promise-not-awaited",
+        "categories": ["floating-promise", "unawaited-promise"],
+        "count": 4,
+        "note": "two labels with the same meaning; must be merged",
+        "strongest_kind": "machine rule",
+        "rule": "ESLint: turn on @typescript-eslint/no-floating-promises, which needs type information (parserOptions.projectService or project). typescript-eslint is already installed and already used by the listed ESLint check, so this is a setting in a listed tool, not a new tool.",
+        "existing_violations": "1, checked by running ESLint with type information: src/handlers/quoteHandler.ts line 28 (audit.write without await)."
+      },
+      {
+        "id": "reimplemented-existing-helper",
+        "categories": ["reimplemented-existing-helper"],
+        "count": 4,
+        "strongest_kind": "coding-agent instruction",
+        "rule": "One short line for the agent instruction file (CLAUDE.md, which does not exist yet, so the proposal creates it or says it must be created) telling the agent to use the helpers in src/lib before writing its own, with a right and wrong example. The four findings are about four different helpers (formatCents, normalisePostcode, kgToGrams, roundToCents), so no single setting of ESLint, Prettier or Vitest expresses it. A proposal that is only a no-restricted-syntax rule for one of the four cases does not match the strongest kind, because it covers a quarter of the pattern; such a rule offered in addition to the instruction is fine.",
+        "existing_violations": "not applicable"
+      }
+    ],
+    "decoys": [
+      {"category": "typo", "count": 1, "why": "single finding"},
+      {"category": "missing-jsdoc", "count": 2, "why": "below min_repeats_for_rule of 3"},
+      {"category": "naming-nitpick", "count": 3, "why": "led_to_change is false on all of them"},
+      {"category": "prefer-early-return", "count": 4, "why": "only 2 of the 4 led to a change, so it is below 3 once the others are dropped"},
+      {"category": "unused-variable", "count": 3, "why": "already covered by an existing rule: @typescript-eslint/no-unused-vars is on in eslint.config.js and ESLint is what reported them"},
+      {"category": "explicit-any", "count": 3, "why": "already covered by an existing rule: @typescript-eslint/no-explicit-any is part of the recommended set in eslint.config.js and ESLint is what reported them"},
+      {"category": "formatting", "count": 4, "why": "already covered by an existing check: Prettier reported them and 'prettier --check' already fails CI"}
+    ],
+    "decoy_note": "5 of 33 findings did not lead to a change, a minority. Giving that number in the report is right; a written proposal because of it counts as a proposal for a decoy. A proposal to add a pre-commit hook or editor setting 'so formatting findings stop appearing' also counts as a proposal for a decoy (and would add a new tool).",
+    "R4": "does not apply (33 findings)",
+    "R5": "applies: autonomy is propose; proposals are files in proposals/, nothing committed to main",
+    "R6": "state file expected next to the log: .improvement-loop/state.json, listing 3 proposals",
+    "R7": "trend numbers (findings per week) required; there are no earlier rules, and the report should say so",
+    "R8": "applies to the two machine rules"
+  },
+  "scripted_answers": {
+    "log location": "Inside the repository at .improvement-loop/findings.jsonl. That file already exists: we have been copying review comments and check failures into it by hand since September. Keep every existing line, keep using that file, and keep it committed.",
+    "where checks run": "Both: on our machines with npm run check, and in GitHub Actions on every pull request.",
+    "how CI findings reach the log": "CI must not push commits. Have the CI job upload its findings as a build artifact that I can download later. Findings from my machine go straight into the log file.",
+    "autonomy": "propose",
+    "which findings count": "The default: only findings that led to a code change.",
+    "reviewer": "People. A teammate reviews every pull request on GitHub and writes comments there. I copy the ones that led to a fix into the log by hand and will keep doing that. There is no AI reviewer and I do not want one added now.",
+    "agent instruction file": "There is none yet. Do not create one during setup. Write CLAUDE.md in the project root into the config as the place where instructions will go once there is something to put in it.",
+    "schedule": "Manual. I will run loop-run myself.",
+    "min repeats, max lines, benchmark tasks": "Use the defaults. I have no benchmark tasks.",
+    "confirm plan": "Yes, go ahead.",
+    "anything else": "Use whatever you recommend as the default, as long as no existing check gets weaker."
+  }
+}
