@@ -1,6 +1,6 @@
 {
   "name": "loop-engineering",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Self-improving review loop: log findings from your reviewer and code checks, then turn repeated ones into permanent rules.",
   "author": {
     "name": "mindaugaskasp"
