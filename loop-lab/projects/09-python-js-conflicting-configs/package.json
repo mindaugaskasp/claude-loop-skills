@@ -1,0 +1,16 @@
+{
+  "name": "repaircafe-widget",
+  "version": "0.7.2",
+  "private": true,
+  "description": "Booking widget for the repair café",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "lint": "eslint frontend"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.0"
+  }
+}

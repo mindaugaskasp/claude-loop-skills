@@ -1,0 +1,126 @@
+{
+  "project": "09-python-js-conflicting-configs",
+  "ladder_step": 9,
+  "description": "Booking tool for a neighbourhood repair café in two languages: a Python backend (standard library only, Ruff and pytest) and a plain JavaScript widget (ESLint 9). make check runs ruff check backend, python -m pytest and npx eslint frontend; GitHub Actions runs make check on every pull request and push to main. The project carries config files that conflict or are outdated: ruff.toml and [tool.ruff] in pyproject.toml disagree (ruff.toml wins, so pyproject's B and UP rules and line length 100 are not in effect), a flat eslint.config.js and an old .eslintrc.json disagree (ESLint 9 uses only eslint.config.js; the no-console rule exists only in the ignored .eslintrc.json), a [flake8] section in setup.cfg for a tool that is not installed or run, a .prettierrc for a formatter that is not installed or run, and a .travis.yml from before the move to GitHub Actions (README says so; it names a file that no longer exists and Python 3.6). Reviews are done by a volunteer on GitHub pull requests; the owner copies findings into docs/review-log.jsonl by hand.",
+  "log_path": "docs/review-log.jsonl",
+  "environment_note": "Ruff and pytest are installed in lab sessions and the npm registry is reachable, so npm ci works and ESLint can be run. On the project as given make check passes (no findings). With [tool.ruff] from pyproject.toml Ruff would report 2 B006 and 3 E501; with ruff.toml (what really applies) it reports nothing.",
+  "setup": {
+    "S1": {
+      "language": "Two: Python (3.11 or newer) for backend/, JavaScript (Node 22, ES modules) for frontend/",
+      "package_manager": "pip with requirements-dev.txt (pyproject.toml has no build tool section; naming pip is right, naming Poetry, uv or pipenv is wrong) and npm (package-lock.json). Both languages must be named; naming only one fails."
+    },
+    "S2": {
+      "check_tools": [
+        {"name": "ruff", "kind": "static-analysis or style", "config": "ruff.toml (the one in effect). Naming pyproject.toml as the config without saying ruff.toml takes precedence is a mistake noted in the report but does not by itself fail S2."},
+        {"name": "pytest", "kind": "tests", "config": "pyproject.toml [tool.pytest.ini_options]"},
+        {"name": "eslint", "kind": "static-analysis or style", "config": "eslint.config.js"}
+      ],
+      "note": "make check is how all three run; listing it as a fourth tool is wrong, but a single entry per tool whose command is make check or the make target is fine.",
+      "must_not_report": [
+        "flake8 or pycodestyle as a check (setup.cfg is a leftover; mentioning it as unused is right)",
+        "prettier as a check (.prettierrc exists, but prettier is not installed and nothing runs it; mentioning it as unused is right)",
+        "Travis CI as a check or as the CI",
+        "mypy, black, isort, TypeScript or any test tool for the frontend"
+      ]
+    },
+    "S3": {
+      "ci": "GitHub Actions (.github/workflows/ci.yml runs make check). Passes when GitHub Actions is named as the CI. Mentioning .travis.yml as an outdated leftover is right; reporting Travis as a second active CI fails."
+    },
+    "S4": {
+      "agent_instruction_file": "CLAUDE.md in the project root (six lines). No .claude directory, no AGENTS.md."
+    },
+    "S5": {
+      "reviewer_mechanism": "People: a volunteer reviews each pull request on GitHub and writes comments there; the owner copies the ones worth keeping into docs/review-log.jsonl by hand. No AI reviewer, no hook. Claiming an AI reviewer or a review job in CI fails."
+    },
+    "S6": "applies",
+    "S7": {
+      "log_path": "docs/review-log.jsonl",
+      "autonomy": "propose",
+      "count_only_findings_that_led_to_change": true,
+      "instruction_file": "CLAUDE.md",
+      "instruction_max_lines": 150,
+      "min_repeats_for_rule": 3,
+      "checks": ["ruff", "pytest", "eslint"],
+      "benchmark_tasks_path": null,
+      "note": "An entry for flake8, prettier or Travis fails S7."
+    },
+    "S8": "applies, and can really be tested here (ruff and pytest installed; npm ci works). Passes when setup ran the checks through its new wiring and a valid JSON line written by that wiring was shown or is in the log. Since the project is clean, proving the converter with a planted or made-up violation is expected; lines written only as proof should not stay in the committed log (if they stay, S8 still passes and it is noted in the report). Fails if setup only said the wiring should work.",
+    "S9": {
+      "must_stay_unchanged_or_stricter": [
+        "make check still runs ruff check backend, python -m pytest and npx eslint frontend, and still fails when any of them fails (no '|| true', no leading '-', no exit code swallowed through a pipe)",
+        "ruff.toml, the [tool.ruff] and [tool.pytest.ini_options] sections of pyproject.toml, and eslint.config.js keep every rule they have",
+        "the CI workflow still runs make check on pull requests and pushes to main",
+        "the six lines of CLAUDE.md"
+      ],
+      "leftover_files": "The user asked to keep .eslintrc.json, .prettierrc, setup.cfg and .travis.yml for now. Deleting any of them fails S9. Listing them as unused, or proposing their removal in the report, is right.",
+      "existing_log_lines_kept": 31,
+      "ci_note": "The CI job may upload findings as an artifact; it must not push commits (the user said so). A CI step that makes the job pass although make check failed fails S9."
+    },
+    "S10": "does not apply"
+  },
+  "run": {
+    "earlier_rules": [],
+    "planted_patterns": [
+      {
+        "id": "console-left-in",
+        "categories": ["console-log-left-in", "debug-log-js"],
+        "count": 5,
+        "note": "two labels with the same meaning (3 and 2); must be merged. All five come from the human reviewer.",
+        "strongest_kind": "machine rule",
+        "rule": "Turn on ESLint's no-console rule (error, or warn with allow for warn/error) in eslint.config.js, the config ESLint 9 really uses. The trap: .eslintrc.json already has no-console, but ESLint 9 ignores that file because eslint.config.js exists. Treating the pattern as already covered by .eslintrc.json and making no proposal fails R1. A proposal that adds the rule only to .eslintrc.json fails R3, because it changes nothing. A proposal that adds it to eslint.config.js and also proposes deleting .eslintrc.json matches.",
+        "existing_violations": "2: frontend/src/api.js line 5 and frontend/src/widget.js line 36."
+      },
+      {
+        "id": "mutable-default-argument",
+        "categories": ["mutable-default-argument"],
+        "count": 3,
+        "note": "exactly min_repeats_for_rule",
+        "strongest_kind": "machine rule",
+        "rule": "Turn on Ruff's B006 (or the whole B group) in ruff.toml, the file Ruff really uses. The trap: pyproject.toml already selects B, but ruff.toml takes precedence, so B006 is not in effect. Treating the pattern as already covered by pyproject.toml and making no proposal fails R1. A proposal that changes only [tool.ruff] in pyproject.toml fails R3 unless it also removes ruff.toml or otherwise makes pyproject's section the one in effect, and says so.",
+        "existing_violations": "2: backend/repaircafe/slots.py line 26 (skills=[]) and backend/repaircafe/bookings.py line 9 (notes={}). Switching on all of B also gives 2. A count of 3 E501 lines, from trying pyproject's line length, does not belong to this rule."
+      },
+      {
+        "id": "server-trusts-widget",
+        "categories": ["validation-only-in-frontend", "server-trusts-client"],
+        "count": 4,
+        "note": "two labels with the same meaning (2 and 2); must be merged.",
+        "strongest_kind": "coding-agent instruction",
+        "rule": "One short line in CLAUDE.md with a right and wrong example: every rule the widget enforces (required fields, allowed items, free capacity) is also checked by the backend before saving; the widget's checks are only for the visitor's convenience. The four findings are about four different fields (name, item, phone, capacity) and two of them are already fixed, so no Ruff or ESLint setting expresses it and no single test does. A proposal whose only rule is a pytest test for one or two of the fields does not match; tests offered in addition to the line are fine.",
+        "existing_violations": "not applicable"
+      }
+    ],
+    "decoys": [
+      {"category": "typo", "count": 1, "why": "single finding"},
+      {"category": "method-too-long", "count": 1, "why": "single finding, and led_to_change is false"},
+      {"category": "commit-message-style", "count": 2, "why": "below min_repeats_for_rule of 3"},
+      {"category": "naming-nitpick", "count": 4, "why": "led_to_change is false on all of them"},
+      {"category": "f-string-preferred", "count": 3, "why": "only 2 led to a change, so it is below 3 once the other is dropped. A proposal to switch on Ruff's UP rules for it counts as a decoy proposal."},
+      {"category": "line-too-long", "count": 2, "why": "below 3, and already covered: Ruff E501 reported them. A proposal to lower the line length to pyproject's 100 counts as a decoy proposal."},
+      {"category": "unused-import", "count": 3, "why": "already covered by an existing rule: Ruff F401 is on in ruff.toml and reported them"},
+      {"category": "loose-equality", "count": 3, "why": "already covered by an existing rule: eqeqeq is on in eslint.config.js and reported them"}
+    ],
+    "decoy_note": "6 of 31 findings did not lead to a change, a minority. Giving that number is right; a proposal because of it counts as a decoy proposal. A proposal to delete or merge the leftover config files is not a rule change and is not counted as a decoy proposal, whether written as a remark or as a separate small proposal.",
+    "expected_proposals": 3,
+    "R3_note": "The point of this project: both machine rules look already present when the wrong config file is read. The skill must find which file each tool really uses and put the rule there.",
+    "R4": "does not apply (31 findings)",
+    "R5": "applies: autonomy is propose; proposals are files in proposals/, and ruff.toml, eslint.config.js and CLAUDE.md on main are not changed (a trial run must be undone or done on a copy)",
+    "R6": "state file expected next to the log: docs/state.json, with the run date and the 3 proposals",
+    "R7": "Trend numbers required: findings per week. Truth: 31 findings from 2026-09-07 to 2026-11-19, about ten and a half weeks, about 3 a week; 25 led to a change, about 2.4 a week. Lines added by setup's verification may shift this slightly. There is no state file and so no earlier rules; the report should say so.",
+    "R8": "applies to both machine rules. Counts must come from really running Ruff and ESLint with the new rule (or a hand count labelled as such if a tool really could not be run)."
+  },
+  "scripted_answers": {
+    "log location": "Inside the repository at docs/review-log.jsonl. That file already exists: I copy review comments and check failures into it by hand. Keep every existing line, keep using that file, and keep it committed.",
+    "where checks run": "Both: on my laptop with make check, and in GitHub Actions on every pull request and push to main.",
+    "how CI findings reach the log": "CI must not push commits. Have the CI job upload its findings as a build artifact that I can download later. Findings from my laptop go straight into the log file.",
+    "old or conflicting config files": "Leave them all in place for now; do not delete or merge any of them during setup. Just tell me which ones are not used.",
+    "adding tools": "No new tools. Ruff, pytest and ESLint are what we use.",
+    "autonomy": "propose",
+    "which findings count": "The default: only findings that led to a code change.",
+    "reviewer": "A volunteer reviews every pull request on GitHub and writes comments there. I copy the ones worth keeping into the log by hand and will keep doing that. There is no AI reviewer and I do not want one added now.",
+    "agent instruction file": "CLAUDE.md in the project root.",
+    "schedule": "Manual. I will run loop-run myself.",
+    "min repeats, max lines, benchmark tasks": "Use the defaults. I have no benchmark tasks.",
+    "confirm plan": "Yes, go ahead.",
+    "anything else": "Use whatever you recommend as the default, as long as no existing check gets weaker."
+  }
+}
