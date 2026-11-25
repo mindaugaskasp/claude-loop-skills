@@ -1,9 +1,9 @@
 {
   "status": "running",
-  "iteration": 8,
+  "iteration": 9,
   "max_iterations": 100,
   "stall_limit": 5,
-  "iterations_without_gain": 2,
+  "iterations_without_gain": 3,
   "consecutive_failed_runs": 0,
   "failed_run_limit": 3,
   "max_projects": 10,
@@ -127,6 +127,21 @@
         "E1": 3,
         "E2": 4
       }
+    },
+    "09-python-js-conflicting-configs": {
+      "skills_version": "0.1.5",
+      "earned": 16,
+      "possible": 16,
+      "setup": "9/9",
+      "run": "7/7",
+      "not_applicable": [
+        "S10",
+        "R4"
+      ],
+      "tool_calls": {
+        "E1": 5,
+        "E2": 8
+      }
     }
   },
   "total_score": 1.0,
@@ -193,6 +208,14 @@
       "change": "loop-run: prepare every pull request and the state file together in one step at the end, not one at a time (tried, not kept)",
       "baseline": "128/128 (1.000), 84 tool calls",
       "result": "128/128 (1.000), 84 tool calls (no fewer; the tie rule asks for 15 percent fewer)",
+      "decision": "no gain"
+    },
+    {
+      "iteration": 9,
+      "date": "2026-11-25",
+      "change": "loop-run step 8: write every proposal and the state file in a single command, for example one shell command with one here-document per file (tried, not kept)",
+      "baseline": "144/144 (1.000), 97 tool calls",
+      "result": "144/144 (1.000), 95 tool calls (2 percent fewer; the tie rule asks for 15 percent fewer)",
       "decision": "no gain"
     }
   ]
