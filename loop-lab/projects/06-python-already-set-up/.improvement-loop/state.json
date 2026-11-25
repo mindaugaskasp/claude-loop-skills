@@ -1,0 +1,32 @@
+{
+  "last_run": "2026-10-12",
+  "rules": [
+    {
+      "category": "bare-except",
+      "kind": "machine rule",
+      "rule": "ruff: E722 added to select in pyproject.toml",
+      "pull_request": "PR #51",
+      "proposed_on": "2026-10-12",
+      "status": "merged",
+      "merged_on": "2026-10-14"
+    },
+    {
+      "category": "naive-datetime",
+      "kind": "coding-agent instruction",
+      "rule": "CLAUDE.md: always use timezone-aware datetimes, zone from Settings.time_zone; never datetime.now() or datetime.utcnow() without a zone",
+      "pull_request": "PR #52",
+      "proposed_on": "2026-10-12",
+      "status": "merged",
+      "merged_on": "2026-10-14"
+    },
+    {
+      "category": "print-in-library",
+      "kind": "machine rule",
+      "rule": "ruff: T20 added to select in pyproject.toml",
+      "pull_request": "PR #53",
+      "proposed_on": "2026-10-12",
+      "status": "merged",
+      "merged_on": "2026-11-18"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+"""Turn the linter's JSON output (read from standard input) into findings log lines.
+
+Usage: ruff check --output-format json --exit-zero . | tools/improvement-loop/log-findings --source ruff
+"""
+
+import argparse
+import json
+import subprocess
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+
+# Labels already used in the log for the linter rules that come up most.
+LABELS = {
+    "F401": "unused-import",
+    "E722": "bare-except",
+    "T201": "print-in-library",
+    "T203": "print-in-library",
+}
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--source", default="ruff")
+    args = parser.parse_args()
+
+    config = json.loads((ROOT / ".improvement-loop.json").read_text(encoding="utf-8"))
+    log_path = ROOT / config["log_path"]
+    branch = subprocess.run(
+        ["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=ROOT, capture_output=True, text=True
+    ).stdout.strip()
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    findings = json.load(sys.stdin)
+    with log_path.open("a", encoding="utf-8") as log:
+        for finding in findings:
+            code = finding.get("code")
+            line = {
+                "ts": now,
+                "source": args.source,
+                "category": LABELS.get(code, (code or "unknown").lower()),
+                "rule": code,
+                "file": str(Path(finding["filename"]).resolve().relative_to(ROOT)),
+                "summary": finding["message"],
+                "led_to_change": None,
+                "ref": branch or None,
+            }
+            log.write(json.dumps(line) + "\n")
+    sys.stderr.write(f"{len(findings)} finding(s) written to {log_path}\n")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,14 @@
+{
+  "log_path": ".improvement-loop/findings.jsonl",
+  "autonomy": "propose",
+  "count_only_findings_that_led_to_change": true,
+  "instruction_file": "CLAUDE.md",
+  "instruction_max_lines": 150,
+  "min_repeats_for_rule": 3,
+  "checks": [
+    {"name": "ruff", "kind": "static-analysis", "config": "pyproject.toml", "command": "ruff check ."},
+    {"name": "ruff format", "kind": "style", "config": "pyproject.toml", "command": "ruff format --check ."},
+    {"name": "reviewer", "kind": "review", "config": ".claude/agents/reviewer.md", "command": "ask the reviewer subagent in Claude Code"}
+  ],
+  "benchmark_tasks_path": null
+}

@@ -19,11 +19,11 @@ Inspect the project and write down what you find for each item. Mark anything yo
 - Agent instruction files (CLAUDE.md at any level, the .claude directory: agents, skills, hooks, settings).
 - How the reviewer is started (subagent, hook, CI job, manual command) and where its findings end up (terminal output, PR comments, CI logs).
 - Whether an inner loop already exists, meaning findings are fed back to a coding agent automatically.
-- An existing `.improvement-loop.json`. If present, this project is already set up: show the config, ask what the user wants changed, and skip to the relevant step.
+- An existing `.improvement-loop.json`. If present, this project is already set up: show the config, ask only what the user wants changed, and skip to the relevant step. Everything the config already settles stays as it is; do not ask the step 2 questions again unless the user's change touches them.
 
 ## Step 2: Report and ask
 
-Show the user a short summary of what was found and what is missing. Then ask, and wait for answers, on every point that discovery did not settle. Always ask these:
+Show the user a short summary of what was found and what is missing. Then ask, and wait for answers, on every point that discovery did not settle. On a first setup, always ask these:
 
 1. Where should the findings log live? Default: outside the repository at `~/.improvement-loop/<project-name>/findings.jsonl`. Alternative: a path inside the repository.
 2. Do the checks run on the user's machine, in CI, or both? If any run in CI, a log path on the user's machine is unreachable from CI. Explain this plainly and agree on one of: a CI artifact that is downloaded later, a separate branch or repository for the log, or shared storage the user already has.

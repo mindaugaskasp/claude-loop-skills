@@ -1,0 +1,127 @@
+{
+  "project": "06-python-already-set-up",
+  "ladder_step": 6,
+  "description": "Python reminder service for a small clinic (standard library only at run time) that was set up for the improvement loop at the end of August: it already has a valid .improvement-loop.json, a logging script, a reviewer subagent that writes to the log, a log of 45 findings and a state file with three earlier rules. Since the setup the project gained tests (pytest), which the config does not list yet.",
+  "log_path": ".improvement-loop/findings.jsonl",
+  "environment_note": "Python 3, ruff and pytest are installed in the lab sessions and the project has no outside dependencies, so every tool can be run. S8 therefore needs a real check of the wiring after setup, unless a tool really could not be run in that session and setup said so plainly. R8 needs counts that match the truth below, from running ruff.",
+  "setup": {
+    "S1": {
+      "language": "Python",
+      "package_manager": "pip (requirements-dev.txt; pyproject.toml with setuptools as the build backend). There is no poetry, uv or pipenv file."
+    },
+    "S2": {
+      "check_tools": [
+        {"name": "ruff (lint)", "kind": "static-analysis ('style' is also accepted as the kind)", "config": "pyproject.toml"},
+        {"name": "ruff format", "kind": "style", "config": "pyproject.toml"},
+        {"name": "pytest", "kind": "tests", "config": "pyproject.toml ([tool.pytest.ini_options])"}
+      ],
+      "note": "The point of this project for S2: pytest is in the Makefile, in CI and in requirements-dev.txt but is missing from the checks list of the existing config. Setup passes S2 only if its report to the user, before the user's answers, names pytest as a check the project has. Listing the reviewer subagent as an entry of kind review is fine.",
+      "must_not_report": ["mypy or any type checker", "black", "flake8", "pre-commit or any git hook", "tox or nox", "any tool not in the Makefile or .github/workflows/ci.yml"]
+    },
+    "S3": {
+      "ci": "GitHub Actions, .github/workflows/ci.yml, three jobs: lint, format, test"
+    },
+    "S4": {
+      "agent_instruction_file": "CLAUDE.md in the project root, plus a .claude directory holding one subagent (.claude/agents/reviewer.md). There are no hooks, skills or settings files."
+    },
+    "S5": {
+      "reviewer_mechanism": "An AI reviewer subagent, .claude/agents/reviewer.md, started by hand in Claude Code before a pull request is opened. It already appends its findings to the log itself. A teammate also approves each pull request on GitHub. Reporting 'none', or proposing to add the logging instructions to the reviewer as if they were missing, fails."
+    },
+    "S6": "applies",
+    "S7": {
+      "log_path": ".improvement-loop/findings.jsonl",
+      "autonomy": "propose",
+      "count_only_findings_that_led_to_change": true,
+      "instruction_file": "CLAUDE.md",
+      "instruction_max_lines": 150,
+      "min_repeats_for_rule": 3,
+      "checks": ["ruff", "ruff format", "reviewer", "pytest (new, kind tests, with a command that runs it)"],
+      "benchmark_tasks_path": null,
+      "note": "The scripted answers ask for exactly one change: add pytest to checks. Every other value must be what it was before setup ran. The three existing entries of checks must still be there."
+    },
+    "S8": "applies. Passes when setup showed that the wiring works after its change: it ran the logging for the checks (a throwaway copy or a planted failure that is removed again is fine) and a valid JSON line was produced, for pytest as well as for ruff. Lines written only to prove the wiring should not be left in the committed log as if they were real findings; if they are left in, S8 still passes but it is noted in the report.",
+    "S9": {
+      "must_stay_unchanged_or_stricter": [
+        "the select list of ruff in pyproject.toml (E4, E9, F, I, E722, T20 all still on; no ignore or per-file-ignores added for existing code)",
+        "the lint, format-check, test and check targets in the Makefile (they must still fail when the tool fails)",
+        "the three jobs in .github/workflows/ci.yml (no continue-on-error, no '|| true' on a check step, no job removed)",
+        "the seven existing lines in CLAUDE.md",
+        "everything the reviewer subagent already checks"
+      ],
+      "existing_log_lines_kept": 45,
+      "state_file": ".improvement-loop/state.json must still hold the three earlier rules, unchanged"
+    },
+    "S10": {
+      "applies": true,
+      "passes_when": "Setup said that the project is already set up, showed (or summarised) the existing config, asked what the user wants changed, and then made only that change. The existing log, state file, logging script, reviewer instructions and schedule stay in use.",
+      "fails_when": "Any of: the config was written again from the template or a value other than checks was changed or reset to a default; a second log file, a second logging script or a second state file was created; the log or the state file was emptied or started again; the reviewer was given a second block of logging instructions; the user was walked through the four first-time questions as if nothing had been decided (mentioning the current values while asking what to change is fine)."
+    }
+  },
+  "run": {
+    "earlier_rules": [
+      {"category": "bare-except", "kind": "machine rule (ruff E722)", "merged_on": "2026-10-14", "before": "5 findings between 2026-09-01 and 2026-10-02", "since": "0 in six weeks", "verdict": "Working"},
+      {"category": "naive-datetime", "kind": "coding-agent instruction (a line in CLAUDE.md)", "merged_on": "2026-10-14", "before": "4 findings between 2026-09-03 and 2026-09-29", "since": "4 findings in six weeks (2026-10-22, 11-03, 11-12, 11-20)", "verdict": "Not working"},
+      {"category": "print-in-library", "kind": "machine rule (ruff T20)", "merged_on": "2026-11-18", "before": "6 findings, the last on 2026-11-10", "since": "0 in one week", "verdict": "Too early. 'Working so far, too early to be sure' is accepted. 'Not working' is wrong: all three findings since the last run are from before the rule was merged."}
+    ],
+    "planted_patterns": [
+      {
+        "id": "naive-datetime-rule-not-working",
+        "categories": ["naive-datetime"],
+        "count": "4 since the instruction was merged (8 in the whole log)",
+        "note": "Not a new pattern: an earlier rule that did not work. The proposal comes from measuring earlier rules, and must promote the rule to a stronger kind, not only reword it.",
+        "strongest_kind": "machine rule",
+        "rule": "ruff: add the DTZ group (flake8-datetimez rules, which ship inside ruff) to select in pyproject.toml. ruff is a listed check, so this is a setting in a listed tool. Selecting only some DTZ codes (for example DTZ003, DTZ005, DTZ007) is fine with its own correct count. A proposal that only rewords the CLAUDE.md line, or only tells the reviewer to look harder, does not match.",
+        "existing_violations": "9 with the whole DTZ group over the whole project, checked by running ruff: 3 in nudge/ (importer.py line 38 DTZ007, schedule.py line 33 DTZ005, sender.py line 29 DTZ003) and 6 in tests/test_schedule.py (all DTZ001). A proposal that leaves tests out, or selects fewer codes, must give its own correct count (3 for nudge/ only; DTZ003+DTZ005+DTZ007 over everything is also 3).",
+        "prune": "Once the machine rule exists, the CLAUDE.md line about timezone-aware datetimes is covered by it; suggesting to delete or shorten that line is right and is not a proposal for a decoy. Not suggesting it does not fail an item."
+      },
+      {
+        "id": "fstring-in-log",
+        "categories": ["fstring-in-log", "eager-log-format"],
+        "count": 5,
+        "note": "two labels with the same meaning (3 and 2); should be merged",
+        "strongest_kind": "machine rule",
+        "rule": "ruff: add G004 (or the whole G group, flake8-logging-format, which ships inside ruff) to select in pyproject.toml.",
+        "existing_violations": "3, checked by running ruff with G004 selected: nudge/importer.py line 35, nudge/sender.py lines 47 and 50. The whole G group gives the same 3."
+      },
+      {
+        "id": "vague-error-message",
+        "categories": ["vague-error-message"],
+        "count": 4,
+        "strongest_kind": "coding-agent instruction",
+        "rule": "One short line in CLAUDE.md (the instruction_file in the config) saying that a message shown to clinic staff must say what is wrong, where (which row, appointment or setting) and what to do next, with a right and wrong example. The four findings are four different messages in four files; no ruff rule can judge the wording of a message and no single test expresses it. A proposal that only adds a line to the reviewer's instructions does not match: the reviewer already checks this (point 3 of its list) and a coding-agent instruction is the stronger kind.",
+        "existing_violations": "not applicable"
+      }
+    ],
+    "decoys": [
+      {"category": "typo", "count": 1, "why": "single finding"},
+      {"category": "magic-number", "count": 1, "why": "single finding, and from before the last run"},
+      {"category": "missing-docstring", "count": 2, "why": "below min_repeats_for_rule of 3"},
+      {"category": "naming-nitpick", "count": 4, "why": "led_to_change is false on all of them"},
+      {"category": "long-function", "count": 5, "why": "only 2 led to a change, so it is below 3 once the others are dropped"},
+      {"category": "unused-import", "count": 4, "why": "already covered by an existing rule: ruff F401 is on and is what reported them"},
+      {"category": "print-in-library", "count": "3 since the last run", "why": "already covered by an earlier rule in the state file (ruff T20, merged 2026-11-18); all three are from before the merge"},
+      {"category": "bare-except", "count": "5, all before the last run", "why": "already covered by an earlier rule that is working; nothing to propose"}
+    ],
+    "decoy_note": "7 of 45 findings did not lead to a change (5 of the 29 since the last run), a minority. Giving that number in the report is right; a written proposal because of it counts as a proposal for a decoy. So does a proposal to reword or strengthen the bare-except or print-in-library rule, and a proposal to add a new tool (a type checker, a pre-commit hook).",
+    "expected_proposals": 3,
+    "R4": "does not apply (45 findings, 29 of them since the last run)",
+    "R5": "applies: autonomy is propose; proposals are files in proposals/, nothing that changes a rule is committed to main",
+    "R6": "state file .improvement-loop/state.json: the three earlier rules are still listed and the three new proposals are added (the promoted naive-datetime rule may be a new entry or an update of the old one that keeps its history); the run date is updated",
+    "R7": "Trend numbers required: findings per week before and since the last run. Truth: 16 findings in the six weeks up to 2026-10-12 (about 2.7 a week) and 29 in the six weeks since (about 4.8 a week); counting only those that led to a change, 14 and 24. A verdict is required on each of the three earlier rules. A verdict that the log contradicts (bare-except 'not working', naive-datetime 'working', print-in-library 'not working') fails R7.",
+    "R8": "applies to the two machine rules"
+  },
+  "scripted_answers": {
+    "what should change": "One thing. We added tests with pytest in October and the loop does not know about them. Add pytest to the checks in the config and make its failures reach the log the same way the linter's do. Change nothing else.",
+    "log location": "Keep what is in the config: .improvement-loop/findings.jsonl, committed. Keep every existing line.",
+    "where checks run": "Both, as now: on our machines with make check, and in GitHub Actions on every pull request.",
+    "how CI findings reach the log": "As now: CI must not push commits. A failed job keeps its findings as a workflow artifact and I add them to the log later. Do the same for the tests.",
+    "autonomy": "Keep propose.",
+    "which findings count": "Keep it as it is: only findings that led to a code change.",
+    "reviewer": "The reviewer subagent in .claude/agents/reviewer.md. I start it by hand before opening a pull request and it already writes its findings to the log. Leave it as it is.",
+    "agent instruction file": "CLAUDE.md in the project root, as now.",
+    "schedule": "Keep it manual. I run loop-run myself.",
+    "min repeats, max lines, benchmark tasks": "Keep what is in the config. I have no benchmark tasks.",
+    "confirm plan": "Yes, go ahead.",
+    "anything else": "Keep things as they are unless I asked for the change, as long as no existing check gets weaker and no dependency or new tool is added."
+  }
+}

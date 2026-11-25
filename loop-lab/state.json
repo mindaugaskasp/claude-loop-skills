@@ -1,6 +1,6 @@
 {
   "status": "running",
-  "iteration": 5,
+  "iteration": 6,
   "max_iterations": 100,
   "stall_limit": 5,
   "iterations_without_gain": 0,
@@ -9,7 +9,7 @@
   "max_projects": 10,
   "project_scores": {
     "01-php-style-only": {
-      "skills_version": "0.1.3",
+      "skills_version": "0.1.5",
       "earned": 16,
       "possible": 16,
       "setup": "9/9",
@@ -20,7 +20,7 @@
       ],
       "tool_calls": {
         "E1": 7,
-        "E2": 3
+        "E2": 9
       }
     },
     "02-php-full-checks": {
@@ -39,7 +39,7 @@
       }
     },
     "03-ts-lint-format-tests": {
-      "skills_version": "0.1.3",
+      "skills_version": "0.1.4",
       "earned": 16,
       "possible": 16,
       "setup": "9/9",
@@ -49,7 +49,7 @@
         "R4"
       ],
       "tool_calls": {
-        "E1": 6,
+        "E1": 5,
         "E2": 4
       }
     },
@@ -69,7 +69,7 @@
       }
     },
     "05-python-monorepo-two-packages": {
-      "skills_version": "0.1.4",
+      "skills_version": "0.1.5",
       "earned": 16,
       "possible": 16,
       "setup": "9/9",
@@ -79,7 +79,21 @@
         "R4"
       ],
       "tool_calls": {
-        "E1": 5,
+        "E1": 6,
+        "E2": 5
+      }
+    },
+    "06-python-already-set-up": {
+      "skills_version": "0.1.5",
+      "earned": 17,
+      "possible": 17,
+      "setup": "10/10",
+      "run": "7/7",
+      "not_applicable": [
+        "R4"
+      ],
+      "tool_calls": {
+        "E1": 6,
         "E2": 4
       }
     }
@@ -124,6 +138,14 @@
       "change": "loop-setup: work in three passes with as few commands as possible (discover, write everything after the user confirmed, verify); verify all checks together in one command; smallest logging script that does the job",
       "baseline": "80/80 (1.000), 68 tool calls",
       "result": "80/80 (1.000), 53 tool calls (22 percent fewer; 16 percent counting only the setup calls)",
+      "decision": "gain"
+    },
+    {
+      "iteration": 6,
+      "date": "2026-11-25",
+      "change": "loop-setup: on a project that is already set up, ask only what the user wants changed and keep everything the config already settles; the standard questions are for a first setup",
+      "baseline": "96/97 (0.990), 61 tool calls",
+      "result": "97/97 (1.000), 70 tool calls",
       "decision": "gain"
     }
   ]
