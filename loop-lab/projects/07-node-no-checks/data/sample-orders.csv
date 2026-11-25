@@ -1,0 +1,7 @@
+order_id,customer_name,customer_email,address,note,sku,title,quantity,unit_price,glaze,shelf_units,made_to_order
+W-1041,Ieva Petrauskaite,ieva@example.invalid,"Uosiu g. 4, Kaunas",,MUG-02,Tall mug,4,24.00,celadon,1,yes
+W-1041,Ieva Petrauskaite,ieva@example.invalid,"Uosiu g. 4, Kaunas",,BWL-05,Ramen bowl,2,38.50,celadon,2,yes
+W-1042,Tomas Jankus,tomas@example.invalid,"Pilies g. 11-3, Vilnius","Please pack the plates with extra paper, the last ones arrived chipped.",PLT-01,Dinner plate,6,29.00,oatmeal,2,yes
+W-1043,Greta Mazeikaite,greta@example.invalid,"Liepu al. 20, Klaipeda","It is a gift, no prices on the slip if possible",VAS-03,Bud vase,1,45.00,tenmoku,1,no
+W-1043,Greta Mazeikaite,greta@example.invalid,"Liepu al. 20, Klaipeda","It is a gift, no prices on the slip if possible",MUG-02,Tall mug,2,24.00,tenmoku,1,yes
+W-1044,Jonas Urbonas,,"Sodu g. 7, Alytus",,PLT-01,Dinner plate,12,29.00,oatmeal,2,yes

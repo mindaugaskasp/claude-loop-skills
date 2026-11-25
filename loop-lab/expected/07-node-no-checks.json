@@ -1,0 +1,109 @@
+{
+  "project": "07-node-no-checks",
+  "ladder_step": 7,
+  "description": "Small command-line helper in plain JavaScript (Node, no dependencies) for a pottery studio: packing slips, a kiln plan and a 'packed' email from the webshop's order export. It has no checks at all: no linter, no formatter, no tests, no CI, no automated reviewer. Two people review each other's pull requests by reading them; one of them copies the comments into a log by hand. A coding agent is used and its notes are in AGENTS.md (there is no CLAUDE.md and no .claude directory).",
+  "log_path": "docs/review-findings.jsonl",
+  "environment_note": "Node is installed in the lab sessions and the project needs nothing else, so the tool itself can be run. There is no check to run, so S8 is judged as described below. No machine rule is possible here, so R8 does not apply.",
+  "setup": {
+    "S1": {
+      "language": "JavaScript (plain, CommonJS) on Node",
+      "package_manager": "npm (package.json and package-lock.json; no dependencies). Naming yarn or pnpm is wrong."
+    },
+    "S2": {
+      "check_tools": [],
+      "note": "The right finding is that the project has no check tools, said plainly. The test script in package.json is the placeholder npm writes (it only prints 'no test specified' and fails); reporting it as a test tool or listing it in checks fails. So does treating .editorconfig or .nvmrc as a check. Listing the people's review as one entry of kind review is fine, and so is an empty list.",
+      "must_not_report": ["eslint", "prettier", "any test tool or test runner (jest, mocha, vitest, node --test) as something the project has", "typescript or a type checker", "the npm test placeholder as a check", ".editorconfig as a check", "husky or any git hook"]
+    },
+    "S3": {
+      "ci": "none (the code is on GitHub but there is no .github directory and nothing runs on a pull request)"
+    },
+    "S4": {
+      "agent_instruction_file": "AGENTS.md in the project root. There is no CLAUDE.md and no .claude directory. Reporting 'none' fails."
+    },
+    "S5": {
+      "reviewer_mechanism": "none automated: the other person reads each pull request on GitHub and comments; Ugne copies the comments into docs/review-findings.jsonl by hand"
+    },
+    "S6": "applies",
+    "S7": {
+      "log_path": "docs/review-findings.jsonl",
+      "autonomy": "propose",
+      "count_only_findings_that_led_to_change": true,
+      "instruction_file": "AGENTS.md",
+      "instruction_max_lines": 150,
+      "min_repeats_for_rule": 3,
+      "checks": "empty, or only an entry of kind review for the people's review. Any tool entry fails, because the project has none and the user said not to add one.",
+      "benchmark_tasks_path": null
+    },
+    "S8": "applies. There is no check that could write a log line. Passes when setup said plainly that there are no checks to run and so nothing could be run to produce a line, and the 30 hand-written lines are still there and are valid JSON. If setup installed a small helper for adding a finding by hand, it passes when that helper was shown to write a valid JSON line (a line written only as proof should not stay in the committed log as if it were a real finding; if it stays, S8 still passes and it is noted in the report).",
+    "S9": {
+      "must_stay_unchanged_or_stricter": [
+        "the six lines of AGENTS.md",
+        "package.json: no dependency, devDependency or lint or test tool added (the user said no); adding a script that only helps with the log is fine",
+        "no CI file added (the user said no)"
+      ],
+      "existing_log_lines_kept": 30,
+      "note": "There is no check to weaken. S9 fails if existing log lines or AGENTS.md lines were removed or changed. Adding a tool, a CI file or a CLAUDE.md against the user's answers is recorded under S7 (config does not reflect the answers) and mentioned in the report."
+    },
+    "S10": "does not apply"
+  },
+  "run": {
+    "earlier_rules": [],
+    "planted_patterns": [
+      {
+        "id": "unawaited-promise",
+        "categories": ["missing-await", "unawaited-promise"],
+        "count": 6,
+        "note": "two labels with the same meaning (4 and 2); must be merged",
+        "strongest_kind": "coding-agent instruction",
+        "rule": "One short line in AGENTS.md (the instruction_file in the config) with a right and wrong example: every call that returns a promise is awaited (or returned) before the result is reported. No check tool is listed in the config, so no machine rule is possible. Proposing to add ESLint or TypeScript, a test (the project has no test tool; Node's built-in test runner is not listed in checks either) or a home-made check script does not match.",
+        "existing_violations": "not applicable (for the record, the code still has two: src/slips.js writeSlips and src/mailer.js notifyPacked)"
+      },
+      {
+        "id": "swallowed-error",
+        "categories": ["swallowed-error"],
+        "count": 5,
+        "strongest_kind": "coding-agent instruction",
+        "rule": "One short line in AGENTS.md with a right and wrong example: never catch an error and carry on silently; let it reach the handler in bin/kiln-desk.js or report it with what failed.",
+        "existing_violations": "not applicable (for the record: src/orders.js readOrders and src/plan.js writePlan)"
+      },
+      {
+        "id": "unescaped-html",
+        "categories": ["unescaped-html"],
+        "count": 3,
+        "note": "exactly min_repeats_for_rule",
+        "strongest_kind": "coding-agent instruction",
+        "rule": "One short line in AGENTS.md with a right and wrong example: every value from the order export goes through escapeHtml before it is put into a packing slip.",
+        "existing_violations": "not applicable (for the record: glaze and address in src/slips.js)"
+      }
+    ],
+    "decoys": [
+      {"category": "typo", "count": 1, "why": "single finding"},
+      {"category": "missing-jsdoc", "count": 1, "why": "single finding and it did not lead to a change"},
+      {"category": "var-instead-of-const", "count": 2, "why": "below min_repeats_for_rule of 3"},
+      {"category": "naming-nitpick", "count": 4, "why": "led_to_change is false on all of them"},
+      {"category": "long-function", "count": 4, "why": "only 2 led to a change, so it is below 3 once the others are dropped"},
+      {"category": "hardcoded-path", "count": 4, "why": "already covered by an existing rule: AGENTS.md has a line about it with a right and wrong example, the last finding (2026-10-13) says the line was added then, and there has been none in the six weeks since. Saying in the report that the existing line seems to work is right; a proposal for it fails R2."}
+    ],
+    "decoy_note": "7 of 30 findings did not lead to a change, a minority. Giving that number in the report is right; a written proposal because of it counts as a proposal for a decoy. So does a proposal whose rule change is adding a tool the project does not have (ESLint, Prettier, TypeScript, a test runner, CI, a git hook). Mentioning in the report, as a remark and not as a proposal file, that a linter could later enforce some of these is fine.",
+    "expected_proposals": 3,
+    "R3_note": "A proposal for a planted pattern that is a reviewer instruction only (for example a checklist for the human reviewer) does not match: the coding-agent instruction is the stronger kind and is possible, because AGENTS.md exists and is the instruction_file. A proposal that adds a tool to get a machine rule does not match either.",
+    "R4": "does not apply (30 findings)",
+    "R5": "applies: autonomy is propose; proposals are files in proposals/, AGENTS.md on main is not changed and nothing that changes a rule is committed to main",
+    "R6": "state file expected next to the log: docs/state.json, with the run date and the 3 proposals",
+    "R7": "Trend numbers required: findings per week. Truth: 30 findings in eight weeks (2026-09-28 to 2026-11-23), about 3.7 a week; 23 of them led to a change, about 2.9 a week. There is no state file and so no earlier rules; the report should say so.",
+    "R8": "does not apply: no machine rule is possible in this project. If a machine rule is proposed anyway, that is a fail under R3."
+  },
+  "scripted_answers": {
+    "log location": "Inside the repository at docs/review-findings.jsonl. That file already exists: I have been copying our review comments into it by hand since the end of September. Keep every existing line, keep using that file, and keep it committed.",
+    "where checks run": "Nowhere. There are no checks, on our machines or on GitHub, and nothing runs when a pull request is opened.",
+    "adding checks, a linter, tests or CI": "No, not now. I know the project has none. I only want our review findings recorded and used. Do not add any tool, dependency or CI file.",
+    "autonomy": "propose",
+    "which findings count": "The default: only findings that led to a code change.",
+    "reviewer": "People. Rasa or I read each pull request on GitHub and comment there. I copy the comments into the log by hand, with a note on whether each led to a fix, and I will keep doing that. There is no AI reviewer and I do not want one added now.",
+    "agent instruction file": "AGENTS.md in the project root. That is what our coding agent reads. Use it as the instruction file in the config. Do not create a CLAUDE.md.",
+    "schedule": "Manual. I will run loop-run myself.",
+    "min repeats, max lines, benchmark tasks": "Use the defaults. I have no benchmark tasks.",
+    "confirm plan": "Yes, go ahead.",
+    "anything else": "Use whatever you recommend as the default, as long as nothing I said no to gets added."
+  }
+}
