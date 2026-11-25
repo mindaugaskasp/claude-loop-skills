@@ -1,0 +1,17 @@
+[package]
+name = "plotwatch"
+version = "0.3.0"
+edition = "2021"
+description = "Water use and yearly water bills per plot for the Kalnu allotment association"
+license = "MIT"
+publish = false
+
+[dependencies]
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+dbg_macro = "deny"
+todo = "deny"
+print_stdout = "allow"

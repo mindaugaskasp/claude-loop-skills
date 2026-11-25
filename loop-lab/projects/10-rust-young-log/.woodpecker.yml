@@ -1,0 +1,23 @@
+# Runs on Codeberg's Woodpecker for every pull request and every push to main.
+when:
+  - event: pull_request
+  - event: push
+    branch: main
+
+steps:
+  - name: format
+    image: rust:1.97
+    commands:
+      - rustup component add rustfmt
+      - cargo fmt --check
+
+  - name: clippy
+    image: rust:1.97
+    commands:
+      - rustup component add clippy
+      - cargo clippy --all-targets -- -D warnings
+
+  - name: test
+    image: rust:1.97
+    commands:
+      - cargo test
