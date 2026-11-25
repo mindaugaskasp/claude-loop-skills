@@ -1,9 +1,9 @@
 {
   "status": "running",
-  "iteration": 9,
+  "iteration": 10,
   "max_iterations": 100,
   "stall_limit": 5,
-  "iterations_without_gain": 3,
+  "iterations_without_gain": 4,
   "consecutive_failed_runs": 0,
   "failed_run_limit": 3,
   "max_projects": 10,
@@ -142,6 +142,25 @@
         "E1": 5,
         "E2": 8
       }
+    },
+    "10-rust-young-log": {
+      "skills_version": "0.1.5",
+      "earned": 12,
+      "possible": 12,
+      "setup": "9/9",
+      "run": "3/3",
+      "not_applicable": [
+        "S10",
+        "R1",
+        "R3",
+        "R6",
+        "R7",
+        "R8"
+      ],
+      "tool_calls": {
+        "E1": 7,
+        "E2": 1
+      }
     }
   },
   "total_score": 1.0,
@@ -216,6 +235,14 @@
       "change": "loop-run step 8: write every proposal and the state file in a single command, for example one shell command with one here-document per file (tried, not kept)",
       "baseline": "144/144 (1.000), 97 tool calls",
       "result": "144/144 (1.000), 95 tool calls (2 percent fewer; the tie rule asks for 15 percent fewer)",
+      "decision": "no gain"
+    },
+    {
+      "iteration": 10,
+      "date": "2026-11-25",
+      "change": "loop-setup rules: aim for one command per pass (one to list and print every config file, one to write every file, one to verify and commit) (tried, not kept)",
+      "baseline": "156/156 (1.000), 105 tool calls",
+      "result": "156/156 (1.000), 113 tool calls (more, not fewer; the tie rule asks for 15 percent fewer)",
       "decision": "no gain"
     }
   ]
