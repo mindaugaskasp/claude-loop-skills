@@ -1,9 +1,9 @@
 {
   "status": "running",
-  "iteration": 6,
+  "iteration": 7,
   "max_iterations": 100,
   "stall_limit": 5,
-  "iterations_without_gain": 0,
+  "iterations_without_gain": 1,
   "consecutive_failed_runs": 0,
   "failed_run_limit": 3,
   "max_projects": 10,
@@ -24,7 +24,7 @@
       }
     },
     "02-php-full-checks": {
-      "skills_version": "0.1.4",
+      "skills_version": "0.1.5",
       "earned": 16,
       "possible": 16,
       "setup": "9/9",
@@ -34,12 +34,12 @@
         "R4"
       ],
       "tool_calls": {
-        "E1": 7,
-        "E2": 6
+        "E1": 6,
+        "E2": 5
       }
     },
     "03-ts-lint-format-tests": {
-      "skills_version": "0.1.4",
+      "skills_version": "0.1.5",
       "earned": 16,
       "possible": 16,
       "setup": "9/9",
@@ -50,11 +50,11 @@
       ],
       "tool_calls": {
         "E1": 5,
-        "E2": 4
+        "E2": 6
       }
     },
     "04-go-vet-lint-tests": {
-      "skills_version": "0.1.4",
+      "skills_version": "0.1.5",
       "earned": 16,
       "possible": 16,
       "setup": "9/9",
@@ -94,6 +94,22 @@
       ],
       "tool_calls": {
         "E1": 6,
+        "E2": 4
+      }
+    },
+    "07-node-no-checks": {
+      "skills_version": "0.1.5",
+      "earned": 15,
+      "possible": 15,
+      "setup": "9/9",
+      "run": "6/6",
+      "not_applicable": [
+        "S10",
+        "R4",
+        "R8"
+      ],
+      "tool_calls": {
+        "E1": 3,
         "E2": 4
       }
     }
@@ -147,6 +163,14 @@
       "baseline": "96/97 (0.990), 61 tool calls",
       "result": "97/97 (1.000), 70 tool calls",
       "decision": "gain"
+    },
+    {
+      "iteration": 7,
+      "date": "2026-11-25",
+      "change": "both skills: when a check tool cannot be installed, try once, do not retry or fetch it another way, say so plainly (loop-run: give a hand count labelled as such) (tried, not kept)",
+      "baseline": "112/112 (1.000), 77 tool calls",
+      "result": "112/112 (1.000), 82 tool calls (no fewer; the tie rule asks for 15 percent fewer)",
+      "decision": "no gain"
     }
   ]
 }
