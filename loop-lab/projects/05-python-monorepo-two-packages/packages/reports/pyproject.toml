@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ledgerline-reports"
+version = "0.9.2"
+description = "Monthly revenue summaries and CSV export"
+requires-python = ">=3.11"
+dependencies = ["ledgerline-billing>=1.4"]
+
+[tool.setuptools]
+packages = ["reports"]
+
+[tool.black]
+line-length = 88
+target-version = ["py311"]

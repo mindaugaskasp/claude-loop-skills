@@ -1,0 +1,123 @@
+{
+  "project": "05-python-monorepo-two-packages",
+  "ladder_step": 5,
+  "description": "Python repository with two separately released packages and different tools in each: packages/billing uses ruff (lint and format), mypy and pytest; packages/reports uses flake8, black and pytest. GitHub Actions with one job per package, a CLAUDE.md at the root plus a second one inside packages/billing, and a reviewer that is a manual command (make review pipes the diff to Claude with a prompt file and prints comments in the terminal).",
+  "log_path": ".improvement-loop/findings.jsonl",
+  "environment_note": "Python 3.13, ruff, mypy, pytest, flake8 and black are installed in the lab sessions and the project has no outside dependencies, so every tool can be run (make check passes on the untouched project). S8 therefore needs a real valid JSON log line written by the wiring after setup, unless a tool really could not be run in that session and setup said so plainly; because the project is clean, proving the wiring on a throwaway copy with a planted mistake counts. R8 needs counts that match the truth below, from running the tool or from a hand count labelled as such.",
+  "setup": {
+    "S1": {
+      "language": "Python",
+      "package_manager": "pip with setuptools; one pyproject.toml per package, no package at the root, development tools listed in requirements-dev.txt. Reporting poetry, uv, pipenv or a lock file fails."
+    },
+    "S2": {
+      "check_tools": [
+        {"name": "ruff (lint: ruff check)", "package": "billing", "kind": "static-analysis or style", "config": "packages/billing/pyproject.toml [tool.ruff]"},
+        {"name": "ruff format --check", "package": "billing", "kind": "style", "config": "packages/billing/pyproject.toml [tool.ruff]", "note": "may be listed as its own entry or together with ruff check"},
+        {"name": "mypy", "package": "billing", "kind": "static-analysis", "config": "packages/billing/pyproject.toml [tool.mypy]"},
+        {"name": "pytest", "package": "billing", "kind": "tests", "config": "packages/billing/pyproject.toml [tool.pytest.ini_options]"},
+        {"name": "flake8", "package": "reports", "kind": "static-analysis or style", "config": "packages/reports/.flake8"},
+        {"name": "black --check", "package": "reports", "kind": "style", "config": "packages/reports/pyproject.toml [tool.black]"},
+        {"name": "pytest", "package": "reports", "kind": "tests", "config": "packages/reports/pytest.ini"}
+      ],
+      "note": "The point of this project: each tool belongs to one package only. S2 passes only when the discovery report and the checks list in the config make clear which package each tool covers (by name, config path or command). Listing the make review reviewer as an entry of kind review is fine.",
+      "must_not_report": ["mypy as a check of reports", "ruff as a check of reports", "flake8 or black as a check of billing", "a shared tool config at the repository root", "isort, pylint, bandit, tox, nox, pre-commit or any git hook", "flake8 plugins such as flake8-bugbear (none is installed or configured)", "any tool not in the Makefile or the workflow"]
+    },
+    "S3": {
+      "ci": "GitHub Actions, .github/workflows/ci.yml, two jobs: billing and reports, each running its package's three or four commands"
+    },
+    "S4": {
+      "agent_instruction_file": "CLAUDE.md in the repository root and a second CLAUDE.md in packages/billing. Both must be reported. There is no .claude directory and no AGENTS.md."
+    },
+    "S5": {
+      "reviewer_mechanism": "A manual command: make review pipes 'git diff main...HEAD' to the claude command line with the prompt in tools/review-prompt.md. Findings are printed in the terminal and nothing records them; the ones that led to a fix are copied into the log by hand. A teammate also approves pull requests on GitHub. Reporting 'none', a subagent, a hook or a CI job as the reviewer fails. No inner loop exists."
+    },
+    "S6": "applies",
+    "S7": {
+      "log_path": ".improvement-loop/findings.jsonl",
+      "autonomy": "propose",
+      "count_only_findings_that_led_to_change": true,
+      "instruction_file": "CLAUDE.md (the root one)",
+      "instruction_max_lines": 150,
+      "min_repeats_for_rule": 3,
+      "checks": ["ruff (billing)", "mypy (billing)", "pytest (billing)", "flake8 (reports)", "black (reports)", "pytest (reports)"],
+      "checks_note": "Each entry's config and command must point into the right package (for example 'cd packages/billing && ruff check .'). The reviewer may be listed as well.",
+      "benchmark_tasks_path": null
+    },
+    "S8": "applies",
+    "S9": {
+      "must_stay_unchanged_or_stricter": [
+        "packages/billing/pyproject.toml tool sections (no rule removed from select, no ignore added, disallow_untyped_defs still true)",
+        "packages/reports/.flake8 (nothing added to extend-ignore or exclude; removing an ignore during setup is not expected but is not a weakening)",
+        "the check, check-billing and check-reports targets in the Makefile (they must still fail when a tool fails)",
+        "both jobs in .github/workflows/ci.yml (no continue-on-error, no '|| true', no job or step removed)",
+        "the existing lines in both CLAUDE.md files",
+        "the four things tools/review-prompt.md tells the reviewer to look for (adding the output format to it is what the scripted answers ask for)"
+      ],
+      "existing_log_lines_kept": 31,
+      "also": "The scripted answers say not to add dependencies or new tools and not to merge the two packages' tool setups. Adding ruff to reports or mypy to reports during setup fails S2 ('no tool reported that the project does not have') if it is listed as a check."
+    },
+    "S10": "does not apply"
+  },
+  "run": {
+    "planted_patterns": [
+      {
+        "id": "mutable-default-argument",
+        "categories": ["mutable-default-arg", "mutable-default"],
+        "count": 4,
+        "where": "all four findings are in packages/billing",
+        "note": "two labels with the same meaning, two findings each; neither reaches 3 alone, so they must be merged",
+        "strongest_kind": "machine rule",
+        "rule": "ruff: add B006 (or the whole B group, with its own correct count) to select in packages/billing/pyproject.toml. The rule ships inside ruff, which is a listed check for billing, so this is a setting in a listed tool. Adding flake8-bugbear to reports would be a new tool and is not needed: no finding is in reports.",
+        "existing_violations": "2, checked by running ruff with B006 selected in packages/billing: src/billing/discounts.py line 12 (extra: dict = {}) and src/billing/invoice.py line 49 (lines: list = []). Selecting the whole B group gives the same 2. Run over packages/reports as well, ruff B006 finds 0 more, but reports is not checked by ruff."
+      },
+      {
+        "id": "bare-except",
+        "categories": ["bare-except", "catch-all-except"],
+        "count": 4,
+        "where": "all four findings are in packages/reports",
+        "note": "two labels with the same meaning, two findings each; must be merged",
+        "strongest_kind": "machine rule",
+        "rule": "flake8: remove E722 from extend-ignore in packages/reports/.flake8. flake8 already has the rule; the project switched it off. Nothing is needed for billing: ruff's selected E group already includes E722 there. Proposing to run ruff over reports, or to add a flake8 plugin, would be a new tool for that package and does not match.",
+        "existing_violations": "2, checked by running flake8 in packages/reports with E722 no longer ignored: reports/export.py line 28 and reports/monthly.py line 38."
+      },
+      {
+        "id": "float-for-money",
+        "categories": ["float-for-money"],
+        "count": 4,
+        "where": "two findings in billing, two in reports",
+        "strongest_kind": "coding-agent instruction",
+        "rule": "One short line in the root CLAUDE.md (the instruction_file in the config) saying that money amounts and rates are Decimal from the moment they are read and are never passed through float, with a right and wrong example. The four findings are four different slips (float division, a float rate from settings, float() before formatting, comparing with a float literal) in both packages; no setting of ruff, mypy, flake8 or black catches them and no single test expresses them. ruff's RUF032 only catches Decimal(<float literal>), which is none of the four, and ruff does not run on reports; proposing it instead of the instruction does not match. Writing the line only into packages/billing/CLAUDE.md does not match either, because half the findings are in reports.",
+        "existing_violations": "not applicable"
+      }
+    ],
+    "decoys": [
+      {"category": "typo", "count": 1, "why": "single finding"},
+      {"category": "missing-docstring", "count": 2, "why": "below min_repeats_for_rule of 3"},
+      {"category": "naming-nitpick", "count": 3, "why": "led_to_change is false on all of them"},
+      {"category": "long-function", "count": 4, "why": "only 2 of the 4 led to a change, so it is below 3 once the others are dropped"},
+      {"category": "unused-import", "count": 3, "why": "already covered by existing rules: F401 is on in ruff (billing) and in flake8 (reports), and those tools are what reported them"},
+      {"category": "untyped-def", "count": 3, "why": "already covered: all three are in billing, reported by mypy, where disallow_untyped_defs is already true. Proposing mypy for reports because of them is a proposal for a decoy and a new tool for that package."},
+      {"category": "formatting", "count": 3, "why": "already covered: black --check in reports reported them and already fails the pipeline"}
+    ],
+    "decoy_note": "5 of 31 findings did not lead to a change, a minority. Giving that number in the report is right; a written proposal because of it counts as a proposal for a decoy. A proposal to add a pre-commit hook, or to make both packages use the same tools, also counts as a proposal for a decoy. Suggestions under 'prune' about CLAUDE.md lines are not proposals for decoys.",
+    "R4": "does not apply (31 findings)",
+    "R5": "applies: autonomy is propose; proposals are files in proposals/, nothing committed to main",
+    "R6": "state file expected next to the log: .improvement-loop/state.json, listing 3 proposals",
+    "R7": "trend numbers (findings per week) required; there are no earlier rules, and the report should say so",
+    "R8": "applies to the two machine rules"
+  },
+  "scripted_answers": {
+    "log location": "Inside the repository at .improvement-loop/findings.jsonl. That file already exists: we have been copying review comments and check failures into it by hand since September. Keep every existing line, keep using that one file for both packages, and keep it committed.",
+    "where checks run": "Both: on our machines with make check, and in GitHub Actions on every pull request.",
+    "how CI findings reach the log": "CI must not push commits. Have the CI jobs keep their findings as a workflow artifact that I can download later. Findings from my machine go straight into the log file.",
+    "autonomy": "propose",
+    "which findings count": "The default: only findings that led to a code change.",
+    "reviewer": "make review, which I run by hand before opening a pull request. It prints comments in the terminal. You may add the output format to tools/review-prompt.md so its findings can be logged, but keep everything it already checks. A teammate also approves each pull request on GitHub; I will keep copying those comments by hand.",
+    "agent instruction file": "The CLAUDE.md in the repository root. Rules that apply to both packages go there. Leave packages/billing/CLAUDE.md as it is.",
+    "one config or one per package": "One .improvement-loop.json at the repository root covering both packages. In the checks list, make clear which package each tool belongs to.",
+    "schedule": "Manual. I will run loop-run myself.",
+    "min repeats, max lines, benchmark tasks": "Use the defaults. I have no benchmark tasks.",
+    "confirm plan": "Yes, go ahead.",
+    "anything else": "Use whatever you recommend as the default, as long as no existing check gets weaker, no dependency or new tool is added, and the two packages keep their own separate tools."
+  }
+}
