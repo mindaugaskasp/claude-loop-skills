@@ -1,9 +1,9 @@
 {
   "status": "running",
-  "iteration": 7,
+  "iteration": 8,
   "max_iterations": 100,
   "stall_limit": 5,
-  "iterations_without_gain": 1,
+  "iterations_without_gain": 2,
   "consecutive_failed_runs": 0,
   "failed_run_limit": 3,
   "max_projects": 10,
@@ -112,6 +112,21 @@
         "E1": 3,
         "E2": 4
       }
+    },
+    "08-ruby-shell-script-reviewer": {
+      "skills_version": "0.1.5",
+      "earned": 16,
+      "possible": 16,
+      "setup": "9/9",
+      "run": "7/7",
+      "not_applicable": [
+        "S10",
+        "R4"
+      ],
+      "tool_calls": {
+        "E1": 3,
+        "E2": 4
+      }
     }
   },
   "total_score": 1.0,
@@ -170,6 +185,14 @@
       "change": "both skills: when a check tool cannot be installed, try once, do not retry or fetch it another way, say so plainly (loop-run: give a hand count labelled as such) (tried, not kept)",
       "baseline": "112/112 (1.000), 77 tool calls",
       "result": "112/112 (1.000), 82 tool calls (no fewer; the tie rule asks for 15 percent fewer)",
+      "decision": "no gain"
+    },
+    {
+      "iteration": 8,
+      "date": "2026-11-25",
+      "change": "loop-run: prepare every pull request and the state file together in one step at the end, not one at a time (tried, not kept)",
+      "baseline": "128/128 (1.000), 84 tool calls",
+      "result": "128/128 (1.000), 84 tool calls (no fewer; the tie rule asks for 15 percent fewer)",
       "decision": "no gain"
     }
   ]
