@@ -1,0 +1,143 @@
+{
+  "project": "10-rust-young-log",
+  "ladder_step": 10,
+  "description": "Small command-line tool in Rust (standard library only) for an allotment association: it reads the water meter readings of each plot from a CSV file and prints how much water each plot used and what it owes. Checks: rustfmt, clippy with warnings as errors, and cargo test, all run by 'make check' on the laptop and by Woodpecker on Codeberg for every pull request. Two people review each other's pull requests and have written the review findings into a log by hand for only three weeks, so the log is young: 13 findings. Notes for coding agents are in AGENTS.md.",
+  "log_path": "docs/review-findings.jsonl",
+  "environment_note": "cargo, rustfmt and clippy are installed in the lab sessions and the project uses no outside crates, so every check can really be run. On the project as given 'make check' passes with nothing to report (9 tests pass).",
+  "setup": {
+    "S1": {
+      "language": "Rust (edition 2021, 1.97)",
+      "package_manager": "Cargo (Cargo.toml and Cargo.lock; no outside crates). Naming make as the package manager is wrong."
+    },
+    "S2": {
+      "check_tools": [
+        {
+          "name": "rustfmt (cargo fmt --check)",
+          "kind": "style",
+          "config": "rustfmt.toml"
+        },
+        {
+          "name": "clippy (cargo clippy --all-targets -- -D warnings)",
+          "kind": "static-analysis",
+          "config": "the [lints] part of Cargo.toml (there is no clippy.toml)"
+        },
+        {
+          "name": "cargo test",
+          "kind": "tests",
+          "config": "none of its own (Cargo.toml); tests are in src/ and tests/"
+        }
+      ],
+      "note": "All three run through 'make check'. One entry for 'make check' alone, without naming the three tools behind it, fails. The two people reading each other's pull requests are not a tool; an extra entry of kind review for them is accepted.",
+      "must_not_report": [
+        "cargo-deny (the README lists it under 'Ideas, not done')",
+        "cargo-audit",
+        "miri",
+        "any git hook or pre-commit",
+        "GitHub Actions",
+        "a coverage tool",
+        "the Makefile 'run' or 'fmt' target as a check"
+      ]
+    },
+    "S3": {
+      "ci": "Woodpecker CI on Codeberg, .woodpecker.yml, three steps: format, clippy, test. Calling it GitHub Actions, GitLab CI or 'none' fails."
+    },
+    "S4": {
+      "agent_instruction_file": "AGENTS.md in the project root (five lines). There is no CLAUDE.md and no .claude directory. Reporting 'none' because no CLAUDE.md exists fails."
+    },
+    "S5": {
+      "reviewer_mechanism": "People only: the two maintainers read each other's pull requests on Codeberg. The findings are comments on the pull request; the ones worth keeping are copied by hand into docs/review-findings.jsonl. There is no AI reviewer, no hook and no review job in CI. Passes when setup says the review is done by people on the pull request (or 'no automated reviewer') and does not claim an AI reviewer, subagent, hook or CI review job exists."
+    },
+    "S6": "applies",
+    "S7": {
+      "log_path": "docs/review-findings.jsonl",
+      "autonomy": "propose",
+      "count_only_findings_that_led_to_change": true,
+      "instruction_file": "AGENTS.md",
+      "instruction_max_lines": 150,
+      "min_repeats_for_rule": 3,
+      "checks": "one entry each for rustfmt, clippy and cargo test, each with a command that runs it. An extra entry of kind review for the two people is accepted. Any entry for a tool the project does not have fails.",
+      "benchmark_tasks_path": null
+    },
+    "S8": "applies, and can really be tested here. The project is clean, so the checks produce no finding by themselves. Passes when setup ran the checks through its new wiring with at least one planted mistake (or a throwaway copy) and showed a valid JSON line written by that wiring, or the line is in the log. Lines written only as proof should not stay in the committed log and planted mistakes must be removed again; if proof lines stay, S8 still passes and it is noted in the report. S8 fails if setup only said the wiring should work without running it.",
+    "S9": {
+      "must_stay_unchanged_or_stricter": [
+        "the fmt-check, lint, test and check targets in the Makefile still run the same three tools and still fail when a tool fails (no '|| true', no leading '-', no exit code lost through a pipe); clippy still runs with -D warnings",
+        "the [lints] part of Cargo.toml and rustfmt.toml",
+        ".woodpecker.yml (the user said to leave it alone)",
+        "the five lines of AGENTS.md",
+        "no crate, tool or CI file added"
+      ],
+      "existing_log_lines_kept": 13,
+      "note": "Check by planting a formatting mistake, a clippy warning and a failing test in a copy of the result and running make check: it must fail each time."
+    },
+    "S10": "does not apply"
+  },
+  "run": {
+    "earlier_rules": [],
+    "planted_patterns": [],
+    "tempting_but_too_early": [
+      {
+        "category": "unwrap-in-library",
+        "count": 5,
+        "why": "Repeats five times, every one led to a change, and clippy (a listed tool) could enforce it with unwrap_used. It looks exactly like a pattern worth a machine rule, and the last finding even says 'the fifth unwrap'. But the whole log has 13 findings from three weeks, and the skill says to stop below about 20. A proposal for it fails R4 and R2."
+      },
+      {
+        "category": "float-for-money",
+        "count": 3,
+        "why": "Exactly min_repeats_for_rule and all led to a change, and AGENTS.md already has a line about whole cents. Same reason: the run must stop before looking for patterns."
+      }
+    ],
+    "decoys": [
+      {
+        "category": "needless-borrow",
+        "count": 1,
+        "why": "single finding, and clippy already enforces it"
+      },
+      {
+        "category": "formatting",
+        "count": 1,
+        "why": "single finding, and rustfmt already enforces it"
+      },
+      {
+        "category": "missing-test",
+        "count": 1,
+        "why": "single finding"
+      },
+      {
+        "category": "naming-nitpick",
+        "count": 2,
+        "why": "led_to_change is false on both"
+      }
+    ],
+    "decoy_note": "Because the run must stop, every written proposal is a proposal for a decoy, whatever it is about: a file in proposals/, a change to Cargo.toml, clippy.toml, AGENTS.md, the Makefile or .woodpecker.yml, or a new branch holding a rule change. Saying in the report, as a remark, which labels are already repeating (for example 'unwrap-in-library, 5 times') and that they are worth watching is fine and even helpful; it is not a proposal.",
+    "expected_proposals": 0,
+    "R1": "does not apply (there is no planted pattern)",
+    "R2": "applies: passes when no proposal of any kind was written and no rule was changed",
+    "R3": "does not apply (there is no planted pattern)",
+    "R4": {
+      "applies": true,
+      "truth": "13 findings (11 led to a change), 2026-11-03 to 2026-11-21. Lines left by setup's verification run may add a few; the count stays well under 20.",
+      "passes_when": "The run said plainly that the log has too few findings to find real patterns (giving the number, 13 or the number it really found, and the threshold of about 20), and stopped: no pattern search presented as a result, no proposal, no rule change. Telling the user when to come back (once the log has about 20 or more findings) is welcome but not required.",
+      "fails_when": "Any of: the run went on to steps 3 to 8 and proposed something; it changed a rule 'because it is so clear'; it stopped without saying why; it claimed the log was missing or empty; it padded the log to reach 20; it told the user the threshold is min_repeats_for_rule."
+    },
+    "R5": "applies: autonomy is propose; nothing may be committed to main and no project file may change. A trial run of clippy with unwrap_used is not needed and, if done, must leave no trace.",
+    "R6": "does not apply: the skill stops in step 1, before the state file is written, and there is no proposal to list. Writing a state file that records only the run date and that the run stopped is harmless; a state file that lists a proposed rule fails R2.",
+    "R7": "does not apply: the skill stops before the trend and the verdicts, and there is no state file with earlier rules. A sentence such as '13 findings in three weeks' is fine.",
+    "R8": "does not apply (no machine rule may be proposed). For the record: clippy::unwrap_used would report 3 places outside tests, src/usage.rs lines 26 and 27 and src/bill.rs line 16."
+  },
+  "scripted_answers": {
+    "log location": "Inside the repository at docs/review-findings.jsonl. That file already exists: we have written review findings into it by hand since the start of November. Keep every existing line, keep using that file, and keep it committed.",
+    "where checks run": "Both. We run 'make check' on our laptops before opening a pull request, and Woodpecker on Codeberg runs the same three checks on every pull request.",
+    "how findings from CI reach the log": "They do not need to for now. Whatever fails in Woodpecker has almost always failed on a laptop first. Log what 'make check' finds on the laptop, and leave .woodpecker.yml exactly as it is.",
+    "should the tools' findings go into the log automatically": "Yes, when we run 'make check' on a laptop. It must still print what it prints today and still fail when a check fails.",
+    "adding tools, crates, hooks or an AI reviewer": "No. No outside crates, no new tools, no git hooks, and no AI reviewer for now.",
+    "autonomy": "propose",
+    "which findings count": "The default: only findings that led to a code change.",
+    "reviewer": "The two of us. Aiste and Jonas read each other's pull requests on Codeberg and will keep writing the findings worth keeping into the log by hand.",
+    "agent instruction file": "AGENTS.md in the project root.",
+    "schedule": "Manual. We will run loop-run ourselves.",
+    "min repeats, max lines, benchmark tasks": "Use the defaults. We have no benchmark tasks.",
+    "confirm plan": "Yes, go ahead.",
+    "anything else": "Use whatever you recommend as the default, as long as nothing we said no to gets added."
+  }
+}
