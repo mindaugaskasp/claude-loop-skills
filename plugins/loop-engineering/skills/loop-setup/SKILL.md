@@ -78,7 +78,7 @@ A skill cannot run on a timer by itself. Offer the user the options that fit the
 
 ## Step 6: Verify and hand over
 
-- Run each check once and confirm that a log line is written and is valid JSON.
+- Run each check once and confirm that a log line is written and is valid JSON. Do this for all checks together in one command, not one check at a time.
 - Confirm the log path is not accidentally inside the repository when the user asked for outside (and add it to .gitignore if it is inside and should not be committed).
 - Tell the user: what was installed, where the log is, how to change settings, and that `loop-run` is the next step once a few weeks of findings exist.
 
@@ -87,3 +87,4 @@ A skill cannot run on a timer by itself. Offer the user the options that fit the
 - Never invent a tool or config that discovery did not find.
 - Never weaken or remove an existing check.
 - Keep changes small and show the user a diff before committing.
+- Work in three passes with as few commands as you can: one to discover (list the files once, then read everything you need together), one to write every new and changed file after the user has confirmed, one to verify. Do not look again at what you have already seen, and write the smallest logging script that does the job.
