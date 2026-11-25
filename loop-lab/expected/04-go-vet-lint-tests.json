@@ -1,0 +1,112 @@
+{
+  "project": "04-go-vet-lint-tests",
+  "ladder_step": 4,
+  "description": "Go stock-keeping service (standard library only) with go vet, a linter (golangci-lint, config version 2) and tests (go test), GitLab CI, an AGENTS.md for coding agents and no automated reviewer: teammates review merge requests.",
+  "log_path": ".improvement-loop/findings.jsonl",
+  "environment_note": "Go 1.24 and golangci-lint 2.5 are installed in the lab sessions and the project has no outside dependencies, so all three tools can be run. S8 therefore needs a real valid JSON log line written by the wiring after setup, unless a tool really could not be run in that session and setup said so plainly. R8 needs counts that match the truth below, from running golangci-lint or from a hand count labelled as such.",
+  "setup": {
+    "S1": {
+      "language": "Go",
+      "package_manager": "Go modules (go.mod, no dependencies, so there is no go.sum)"
+    },
+    "S2": {
+      "check_tools": [
+        {"name": "go vet", "kind": "static-analysis", "config": "none of its own (go.mod); 'not found' or null as the config is correct"},
+        {"name": "golangci-lint", "kind": "static-analysis ('style' is also accepted as the kind)", "config": ".golangci.yml"},
+        {"name": "go test", "kind": "tests", "config": "none of its own (go.mod); 'not found' or null as the config is correct"}
+      ],
+      "note": "Listing the human review as an entry of kind review is fine. Mentioning that golangci-lint runs govet, staticcheck, errcheck, ineffassign, unused, misspell and unconvert inside it is fine; they are settings of the one tool.",
+      "must_not_report": ["gofmt or goimports as a check of this project (no script, Makefile target or CI job runs them)", "staticcheck as a separately installed tool", "revive", "pre-commit or any git hook", "GitHub Actions", "any tool not in the Makefile or .gitlab-ci.yml"]
+    },
+    "S3": {
+      "ci": "GitLab CI, .gitlab-ci.yml, three jobs: vet, lint, test"
+    },
+    "S4": {
+      "agent_instruction_file": "AGENTS.md in the project root. There is no CLAUDE.md and no .claude directory. Reporting 'none' fails; reporting AGENTS.md and noting that CLAUDE.md is absent passes."
+    },
+    "S5": {
+      "reviewer_mechanism": "none automated. Teammates review merge requests (README.md); comments that led to a fix are copied into the log by hand. Passes when setup reports that there is no AI or scripted reviewer and does not claim one exists."
+    },
+    "S6": "applies",
+    "S7": {
+      "log_path": ".improvement-loop/findings.jsonl",
+      "autonomy": "propose",
+      "count_only_findings_that_led_to_change": true,
+      "instruction_file": "AGENTS.md",
+      "instruction_max_lines": 150,
+      "min_repeats_for_rule": 3,
+      "checks": ["go vet", "golangci-lint", "go test"],
+      "benchmark_tasks_path": null
+    },
+    "S8": "applies",
+    "S9": {
+      "must_stay_unchanged_or_stricter": [
+        ".golangci.yml (no linter switched off, no exclusion added for existing source)",
+        "the vet, lint, test and check targets in the Makefile (they must still fail when the tool fails)",
+        "the three jobs in .gitlab-ci.yml (no allow_failure, no '|| true', no job removed or given rules so that a failing check stops failing the pipeline)",
+        "the six existing lines in AGENTS.md"
+      ],
+      "existing_log_lines_kept": 32,
+      "also": "The scripted answers say not to add an AI reviewer and not to create a CLAUDE.md. Doing either does not fail S9, but creating CLAUDE.md or writing it into the config as instruction_file fails S7 ('reflects the scripted answers')."
+    },
+    "S10": "does not apply"
+  },
+  "run": {
+    "planted_patterns": [
+      {
+        "id": "error-not-wrapped",
+        "categories": ["error-not-wrapped", "errorf-without-w"],
+        "count": 5,
+        "note": "two labels with the same meaning; must be merged",
+        "strongest_kind": "machine rule",
+        "rule": "golangci-lint: enable the errorlint linter in .golangci.yml (it ships inside golangci-lint, which is a listed check, so this is a setting in a listed tool, not a new tool). Limiting it to its errorf check is fine.",
+        "existing_violations": "2, checked by running golangci-lint with errorlint enabled: internal/stock/service.go line 38 (save error with %v in Receive) and line 66 (list error with %v in LowStock)."
+      },
+      {
+        "id": "shadowed-err",
+        "categories": ["shadowed-err", "variable-shadowing"],
+        "count": 4,
+        "note": "two labels with the same meaning; must be merged",
+        "strongest_kind": "machine rule",
+        "rule": "golangci-lint: switch on the shadow analyzer of govet in .golangci.yml (linters.settings.govet.enable: add shadow). govet is already on and already has a settings block. Running 'go vet -vettool' with a separately installed shadow binary would be a new tool and does not match.",
+        "existing_violations": "1 with the default (not strict) setting, checked by running golangci-lint: internal/stock/csvimport.go line 23 (err from strconv.Atoi shadows err from ReadAll, which is returned at the end). With strict: true the count is higher; a proposal that uses strict must give its own correct count."
+      },
+      {
+        "id": "domain-rule-in-handler",
+        "categories": ["domain-rule-in-handler"],
+        "count": 4,
+        "strongest_kind": "coding-agent instruction",
+        "rule": "One short line in AGENTS.md (the instruction_file in the config) saying that stock rules (quantity checks, limits, not-enough-stock) belong in internal/stock and handlers only translate HTTP to service calls, with a right and wrong example. The four findings are about four different rules in four handlers, so no setting of go vet or golangci-lint and no single test expresses it. A depguard or forbidigo setting does not cover it. A proposal that writes the line into a new CLAUDE.md instead of AGENTS.md does not match.",
+        "existing_violations": "not applicable"
+      }
+    ],
+    "decoys": [
+      {"category": "typo", "count": 1, "why": "single finding"},
+      {"category": "missing-doc-comment", "count": 2, "why": "below min_repeats_for_rule of 3"},
+      {"category": "naming-nitpick", "count": 3, "why": "led_to_change is false on all of them"},
+      {"category": "prefer-early-return", "count": 4, "why": "only 2 of the 4 led to a change, so it is below 3 once the others are dropped"},
+      {"category": "unchecked-error", "count": 3, "why": "already covered by an existing rule: errcheck is in the standard set of golangci-lint and is what reported them"},
+      {"category": "unused-code", "count": 3, "why": "already covered by an existing rule: unused is in the standard set of golangci-lint and is what reported them"},
+      {"category": "printf-args", "count": 3, "why": "already covered by an existing check: go vet reported them and 'go vet ./...' already fails the pipeline"}
+    ],
+    "decoy_note": "5 of 32 findings did not lead to a change, a minority. Giving that number in the report is right; a written proposal because of it counts as a proposal for a decoy. A proposal to add a pre-commit hook 'so vet and lint findings stop reaching review' also counts as a proposal for a decoy (and would add a new tool). Suggestions under 'prune' about AGENTS.md lines are not proposals for decoys.",
+    "R4": "does not apply (32 findings)",
+    "R5": "applies: autonomy is propose; proposals are files in proposals/, nothing committed to main",
+    "R6": "state file expected next to the log: .improvement-loop/state.json, listing 3 proposals",
+    "R7": "trend numbers (findings per week) required; there are no earlier rules, and the report should say so",
+    "R8": "applies to the two machine rules"
+  },
+  "scripted_answers": {
+    "log location": "Inside the repository at .improvement-loop/findings.jsonl. That file already exists: we have been copying review comments and check failures into it by hand since September. Keep every existing line, keep using that file, and keep it committed.",
+    "where checks run": "Both: on our machines with make check, and in GitLab CI on every merge request.",
+    "how CI findings reach the log": "CI must not push commits. Have the CI jobs keep their findings as a job artifact that I can download later. Findings from my machine go straight into the log file.",
+    "autonomy": "propose",
+    "which findings count": "The default: only findings that led to a code change.",
+    "reviewer": "People. A teammate reads every merge request in GitLab and writes comments there. I copy the ones that led to a fix into the log by hand and will keep doing that. There is no AI reviewer and I do not want one added now.",
+    "agent instruction file": "AGENTS.md in the project root. That is the file our coding agents read. Use it as the instruction file in the config and do not create a CLAUDE.md.",
+    "schedule": "Manual. I will run loop-run myself.",
+    "min repeats, max lines, benchmark tasks": "Use the defaults. I have no benchmark tasks.",
+    "confirm plan": "Yes, go ahead.",
+    "anything else": "Use whatever you recommend as the default, as long as no existing check gets weaker and no dependency is added to go.mod."
+  }
+}

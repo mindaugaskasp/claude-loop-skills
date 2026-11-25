@@ -1,9 +1,9 @@
 {
   "status": "running",
-  "iteration": 3,
+  "iteration": 4,
   "max_iterations": 100,
   "stall_limit": 5,
-  "iterations_without_gain": 0,
+  "iterations_without_gain": 1,
   "consecutive_failed_runs": 0,
   "failed_run_limit": 3,
   "max_projects": 10,
@@ -52,6 +52,21 @@
         "E1": 6,
         "E2": 4
       }
+    },
+    "04-go-vet-lint-tests": {
+      "skills_version": "0.1.3",
+      "earned": 16,
+      "possible": 16,
+      "setup": "9/9",
+      "run": "7/7",
+      "not_applicable": [
+        "S10",
+        "R4"
+      ],
+      "tool_calls": {
+        "E1": 7,
+        "E2": 6
+      }
     }
   },
   "total_score": 1.0,
@@ -79,6 +94,14 @@
       "baseline": "48/48 (1.000), 51 tool calls",
       "result": "48/48 (1.000), 38 tool calls (25 percent fewer)",
       "decision": "gain"
+    },
+    {
+      "iteration": 4,
+      "date": "2026-11-25",
+      "change": "loop-setup: list files once and read them together in one step; keep the setup short, write the smallest logging script that does the job, verify once (tried, not kept)",
+      "baseline": "64/64 (1.000), 51 tool calls",
+      "result": "64/64 (1.000), 48 tool calls (6 percent fewer, below the 15 percent the tie rule asks for)",
+      "decision": "no gain"
     }
   ]
 }
