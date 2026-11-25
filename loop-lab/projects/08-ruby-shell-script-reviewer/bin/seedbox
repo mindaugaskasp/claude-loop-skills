@@ -1,0 +1,37 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+$LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
+require "seedbox"
+
+command, *args = ARGV
+
+begin
+  case command
+  when "lend"
+    loan = Seedbox::Loans.new.lend(member_id: args.fetch(0), packet_id: args.fetch(1))
+    puts "Lent packet #{loan.packet_id} to member #{loan.member_id}, due back #{loan.due_on}."
+  when "back"
+    loan = Seedbox::Loans.new.give_back(args.fetch(0))
+    puts "Loan #{loan.id} is closed."
+  when "due"
+    Seedbox::Loans.new.due.each do |l|
+      puts "#{l.id}  member #{l.member_id}  packet #{l.packet_id}  due #{l.due_on}"
+    end
+  when "remind"
+    paths = Seedbox::Reminders.new.write_all
+    puts "Wrote #{paths.size} reminder letters."
+  when "import"
+    count = Seedbox::Import.new.members(args.fetch(0))
+    puts "Imported #{count} members."
+  else
+    warn "Usage: seedbox lend|back|due|remind|import"
+    exit 2
+  end
+rescue Seedbox::Error => e
+  warn "seedbox: #{e.message}"
+  exit 1
+rescue IndexError
+  warn "seedbox: an argument is missing. See README.md for the commands."
+  exit 2
+end

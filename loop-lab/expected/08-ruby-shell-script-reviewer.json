@@ -1,0 +1,156 @@
+{
+  "project": "08-ruby-shell-script-reviewer",
+  "ladder_step": 8,
+  "description": "Small command-line helper in plain Ruby (one gem, csv) for a street seed library: loans of seed packets, what is due back, reminder letters and a member import. Its only check is scripts/review.sh, a home-made shell script that greps the Ruby files for five kinds of mistake, prints one line per problem and exits 1 when it finds any. The owner runs it by hand with 'make review' before every merge. There are no tests, no linter, no formatter and no CI. The owner also reads each change herself and has kept a findings log by hand since late September. Notes for the coding agent are in CLAUDE.md.",
+  "log_path": "notes/review-log.jsonl",
+  "environment_note": "The check is a bash script that needs only grep, find and head, so it can really be run in the lab sessions; Ruby is also installed. On the project as given, 'make review' prints exactly one finding (lib/seedbox/loans.rb line 43, todo-without-name) and exits 1.",
+  "setup": {
+    "S1": {
+      "language": "Ruby (plain, 3.3)",
+      "package_manager": "Bundler (Gemfile and Gemfile.lock; one gem, csv). Saying RubyGems together with Bundler is fine. Naming rake as the package manager is wrong."
+    },
+    "S2": {
+      "check_tools": [
+        {
+          "name": "scripts/review.sh (run as 'make review')",
+          "kind": "review ('static-analysis' or 'style' is also accepted as the kind, since it is a pattern search)",
+          "config": "the script itself; it has no separate config file"
+        }
+      ],
+      "note": "The script is the one and only check and must be reported as such, and as home-made. Listing 'make review' and 'make check' as separate tools is wrong: both run the same script (one entry whose command is either of them is right). The owner reading each change is not a tool; an extra entry of kind review for her reading is accepted.",
+      "must_not_report": [
+        "rubocop or standard",
+        "rspec, minitest or any test tool",
+        "reek, brakeman, sorbet, steep or any other analysis tool",
+        "a formatter",
+        "the Makefile 'run' target as a check",
+        ".ruby-version or the Gemfile as a check",
+        "any git hook"
+      ]
+    },
+    "S3": {
+      "ci": "none (the code is on a self-hosted Gitea without runners; no CI file exists and nothing runs when a branch is pushed)"
+    },
+    "S4": {
+      "agent_instruction_file": "CLAUDE.md in the project root (six lines). There is no .claude directory and no AGENTS.md."
+    },
+    "S5": {
+      "reviewer_mechanism": "The home-made shell script scripts/review.sh, started by hand with 'make review' (or 'make check') before a merge; CLAUDE.md also tells the coding agent to run it before finishing. Its findings are printed in the terminal and nothing stores them automatically; the owner copies them, and her own reading notes, into notes/review-log.jsonl by hand. Passes when setup names the script as the reviewer, says it is started by hand, and does not claim an AI reviewer, a hook or a CI job exists."
+    },
+    "S6": "applies",
+    "S7": {
+      "log_path": "notes/review-log.jsonl",
+      "autonomy": "propose",
+      "count_only_findings_that_led_to_change": true,
+      "instruction_file": "CLAUDE.md",
+      "instruction_max_lines": 150,
+      "min_repeats_for_rule": 3,
+      "checks": "one entry for scripts/review.sh, with its command ('make review' or 'scripts/review.sh'). An extra entry of kind review for the owner's own reading is accepted. Any entry for a tool the project does not have fails.",
+      "benchmark_tasks_path": null
+    },
+    "S8": "applies, and can really be tested here. Passes when setup ran the review through its new wiring and a valid JSON line written by that wiring was shown or is in the log (on the project as given the run produces one finding: todo-without-name in lib/seedbox/loans.rb). Proving the converter with a made-up finding as well is fine. Lines written only as proof with invented content should not stay in the committed log; if they stay, S8 still passes and it is noted in the report. A line for the real todo-without-name finding may stay. S8 fails if setup only said the wiring should work without running it, although nothing stops it from running.",
+    "S9": {
+      "must_stay_unchanged_or_stricter": [
+        "all five checks in scripts/review.sh still run (debugger-left-in, todo-without-name, tab-indent, long-line, missing-frozen-string-literal), over the same files",
+        "the script still prints its findings in the terminal and still exits 1 when it finds any; 'make review' still fails when the script fails (no '|| true', no leading '-' on the recipe, no swallowed exit code through a pipe)",
+        "the six lines of CLAUDE.md",
+        "no tool, gem or CI file added (the user said no)"
+      ],
+      "existing_log_lines_kept": 30,
+      "note": "Wrapping the script or adding a logging option to it is fine as long as the points above hold. The classic way to break it: 'scripts/review.sh | log-findings' in the Makefile without pipefail, so that make review passes although the script found something. That fails S9. Check it by running make review on the result and looking at the exit code."
+    },
+    "S10": "does not apply"
+  },
+  "run": {
+    "earlier_rules": [],
+    "planted_patterns": [
+      {
+        "id": "time-not-from-clock",
+        "categories": [
+          "time-now-direct",
+          "local-time-used"
+        ],
+        "count": 5,
+        "note": "two labels with the same meaning (3 and 2); must be merged. All five come from the owner's own reading; the script has no check for it.",
+        "strongest_kind": "machine rule",
+        "rule": "A new check in scripts/review.sh, which is the tool listed in checks: report Time.now and Date.today (and the like, such as Time.new without arguments or DateTime.now) in bin/ and lib/ outside lib/seedbox/clock.rb. This is a rule in a listed tool, not a new tool and not a new script, so it is the first option on the skill's list and it is possible. A proposal that adds this check and also a line in CLAUDE.md matches. A proposal that is only a CLAUDE.md line, or only an instruction for the reviewer, does not match. Adding RuboCop or another tool does not match.",
+        "existing_violations": "2: lib/seedbox/loans.rb line 32 (Date.today in give_back) and lib/seedbox/reminders.rb line 39 (Time.now in the letter text). lib/seedbox/clock.rb line 8 is the one allowed place; a count of 3 passes only if it says the third is clock.rb and that the rule leaves it out."
+      },
+      {
+        "id": "csv-column-by-position",
+        "categories": [
+          "csv-column-by-position"
+        ],
+        "count": 3,
+        "note": "exactly min_repeats_for_rule; all from the owner's own reading",
+        "strongest_kind": "machine rule",
+        "rule": "A new check in scripts/review.sh: report a CSV row read by number, such as row[0] or row[3], in bin/ and lib/; rows are read by header name. Same reasoning as above. A proposal that adds this check and also a line in CLAUDE.md matches; a CLAUDE.md line alone does not.",
+        "existing_violations": "1: lib/seedbox/import.rb line 24 (email: row[3]). A pattern broader than row[number] may count more places; it passes if every place it names really reads a CSV row by position."
+      },
+      {
+        "id": "unhelpful-error-message",
+        "categories": [
+          "unhelpful-error-message"
+        ],
+        "count": 4,
+        "strongest_kind": "coding-agent instruction",
+        "rule": "One short line in CLAUDE.md with a right and wrong example: an error says what failed and what the person can do, and is raised as Seedbox::Error. The four findings have four different shapes (raise with a bare word, rescue and puts, abort, warn), and whether a message is helpful cannot be found by a text search, so no check in the script expresses it. A proposal that adds a grep for one of the shapes as its only rule does not match.",
+        "existing_violations": "not applicable"
+      }
+    ],
+    "decoys": [
+      {
+        "category": "typo",
+        "count": 1,
+        "why": "single finding"
+      },
+      {
+        "category": "commit-message-style",
+        "count": 2,
+        "why": "below min_repeats_for_rule of 3"
+      },
+      {
+        "category": "naming-nitpick",
+        "count": 4,
+        "why": "led_to_change is false on all of them"
+      },
+      {
+        "category": "method-too-long",
+        "count": 4,
+        "why": "only 2 led to a change, so it is below 3 once the others are dropped"
+      },
+      {
+        "category": "todo-without-name",
+        "count": 3,
+        "why": "already covered by an existing rule: the script has this check and is what reported them. Setup's verification run may have added one or more lines of this category (led_to_change null or false); that does not change anything."
+      },
+      {
+        "category": "missing-frozen-string-literal",
+        "count": 4,
+        "why": "already covered by an existing rule: the script has this check and is what reported them, and CLAUDE.md already has a line about it. A remark in the report that the written line does not seem to stop it is fine; a written proposal for it fails R2, except a prune proposal under step 6 of the skill to delete the CLAUDE.md line because the script enforces it."
+      }
+    ],
+    "decoy_note": "6 of 30 findings did not lead to a change, a minority. Giving that number in the report is right; a written proposal because of it counts as a proposal for a decoy. So does a proposal whose rule change is adding a tool the project does not have (RuboCop, a test tool, CI, a git hook), and a proposal to run the script automatically (hook or CI) 'so its findings stop reaching review'. Mentioning such things in the report as a remark is fine.",
+    "expected_proposals": 3,
+    "R3_note": "The point of this project: the only tool in checks is home-made, and the skill says not to add a home-made check script to get a machine rule. Extending the script that is already the project's listed check is not adding one; it is 'a rule in one of the tools listed in checks'. Two of the three patterns can be expressed that way and must be.",
+    "R4": "does not apply (30 findings, or a few more after setup's verification run)",
+    "R5": "applies: autonomy is propose; proposals are files in proposals/, and scripts/review.sh and CLAUDE.md on main are not changed (a trial run of a new check must be undone or done on a copy)",
+    "R6": "state file expected next to the log: notes/state.json, with the run date and the 3 proposals",
+    "R7": "Trend numbers required: findings per week. Truth: 30 findings in about eight and a half weeks (2026-09-21 to 2026-11-20), about 3.5 a week; 24 of them led to a change, about 2.8 a week. Lines added by setup's verification run may shift this slightly. There is no state file and so no earlier rules; the report should say so.",
+    "R8": "applies to the two machine rules. The counts must come from really running the new check (or the same search) over the code, which is possible here."
+  },
+  "scripted_answers": {
+    "log location": "Inside the repository at notes/review-log.jsonl. That file already exists: I have written the script's findings and my own into it by hand since late September. Keep every existing line, keep using that file, and keep it committed.",
+    "where checks run": "Only on my laptop. I run 'make review' by hand before I merge. Our Gitea has no runners, so nothing runs on the server.",
+    "should the script's findings go into the log automatically": "Yes please. Make it so that every finding the script prints also ends up in the log without me copying it. It must still print in the terminal and still fail when it finds something.",
+    "adding checks, a linter, tests or CI": "No, not now. The script is the only check and I want to keep it that way for the moment. Do not add any gem, tool, hook or CI file.",
+    "autonomy": "propose",
+    "which findings count": "The default: only findings that led to a code change.",
+    "reviewer": "The script, started by hand with 'make review'. I also read every change myself and will keep adding my own notes to the log by hand. There is no AI reviewer and I do not want one added now.",
+    "agent instruction file": "CLAUDE.md in the project root.",
+    "schedule": "Manual. I will run loop-run myself.",
+    "min repeats, max lines, benchmark tasks": "Use the defaults. I have no benchmark tasks.",
+    "confirm plan": "Yes, go ahead.",
+    "anything else": "Use whatever you recommend as the default, as long as nothing I said no to gets added."
+  }
+}
