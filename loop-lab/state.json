@@ -1,9 +1,9 @@
 {
-  "status": "running",
-  "iteration": 10,
+  "status": "done",
+  "iteration": 11,
   "max_iterations": 100,
   "stall_limit": 5,
-  "iterations_without_gain": 4,
+  "iterations_without_gain": 5,
   "consecutive_failed_runs": 0,
   "failed_run_limit": 3,
   "max_projects": 10,
@@ -243,6 +243,14 @@
       "change": "loop-setup rules: aim for one command per pass (one to list and print every config file, one to write every file, one to verify and commit) (tried, not kept)",
       "baseline": "156/156 (1.000), 105 tool calls",
       "result": "156/156 (1.000), 113 tool calls (more, not fewer; the tie rule asks for 15 percent fewer)",
+      "decision": "no gain"
+    },
+    {
+      "iteration": 11,
+      "date": "2026-11-25",
+      "change": "loop-run step 5: do the whole trial of candidate machine rules in a single command (switch on, run once, count per rule, put the config back), and count with one search when the tool cannot be run (tried, not kept)",
+      "baseline": "156/156 (1.000), 105 tool calls",
+      "result": "156/156 (1.000), 101 tool calls (4 percent fewer; the tie rule asks for 15 percent fewer)",
       "decision": "no gain"
     }
   ]
